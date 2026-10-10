@@ -29,7 +29,9 @@ If the sample git repository hasn't been cloned yet, WDT has git tools integrate
 ### Building the sample in Eclipse
 :pushpin: [Switch to cmd line example](/docs/Using-cmd-line.md/#building-the-sample)
 
-This sample can be built using either [Gradle](#building-with-gradle) or [Maven](#building-with-maven).
+This fork uses [Gradle](#building-with-gradle) as its sole build. Select the
+checked-in wrapper and Java 8 in Buildship. The historical Eclipse/WDT setup
+below has not been revalidated; [IDEA setup](Using-IDEA.md) is the verified IDE path.
 
 #building-with-gradle
 #### Building with [Gradle](http://gradle.org/)
@@ -54,28 +56,8 @@ This assumes you have the Gradle [Buildship](https://projects.eclipse.org/projec
 ###### Run Gradle build
 
 1. Go to the *Gradle Tasks* view in Eclipse and navigate to the *sample.daytrader3* project
-2. Double click: build
-
-#building-with-maven
-#### Building with [Maven](http://maven.apache.org/)
-
-###### Import Maven projects into WDT
-
-1.  In the Git Repository view, expand the daytrader3 repo to see the "Working Directory" folder
-2.  Right-click on this folder, and select *Copy path to Clipboard*
-3.  Select menu *File -> Import -> Maven -> Existing Maven Projects*
-4.  In the Root Directory textbox, Paste in the repository directory.
-5.  Select *Browse...* button and select *Finish* (confirm it finds 5 pom.xml files)
-6.  This will create 5 projects in Eclipse: sample.daytrader3, daytrader3-ee6, daytrader3-ee6-ejb, daytrader3-ee6-web, daytrader3-ee6-wlpcfg
-
-:star: *Note:* If you did not use Eclipse/WDT to clone the git repository, follow from step 3, but navigate to the cloned repository directory rather than pasting its name in step 4.
-
-###### Run Maven install
-
-1. Right-click on sample.daytrader3/pom.xml
-2. *Run As > Maven build...*
-3. In the *Goals* section enter "install"
-4. Click *Run*
+2. Double click: build. This currently starts and stops Liberty through the empty
+   functional-test lifecycle; see [runtime setup](Restored-runtime.md).
 
 ### Running the application locally
 :pushpin: [Switch to cmd line example](/docs/Using-cmd-line.md/#running-the-application-locally)
@@ -97,7 +79,7 @@ For the purposes of this sample, we will create the Liberty server (step 3 in th
     * Choose an option with Java EE6 WebProfile.  
 5. Follow the prompts (and possibly choose additional features to install) until you *Finish* creating the Runtime Environment
 
-###### Add the User directory from the maven or Gradle project, and create a server
+###### Add the User directory from the Gradle project, and create a server
 
 1. Right-click on the Runtime Environment created above in the 'Runtime Explorer' view, and select *Edit*
 2. Click the `Advanced Options...` link
@@ -133,7 +115,3 @@ daytrader3-ee6-wlpcfg
 5.  Click on '(Re)-create  DayTrader Database Tables and Indexes' to create the database.
 6.  Click on '(Re)-populate  DayTrader Database' to populate the database.
 7.  Back on the Servers tab,  Right-click on the appropriate server (as created above) and select *Restart*-> .  Now the application will be ready for use.
-
-#### Tips
-
-* When importing the existing maven project into Eclipse, Eclipse will (by default) "helpfully" add this project to an (extraneous) ear. To turn this off, go to Preferences -> Java EE -> Project, and uncheck "Add project to an EAR" before you import the project. If you forgot to do this, just delete the ear project; no harm.

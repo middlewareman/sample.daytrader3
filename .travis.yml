@@ -3,9 +3,5 @@ language: java
 jdk:
     - openjdk8
 
-env:
-    - TEST_COMMAND="gradle clean build"
-    - TEST_COMMAND="mvn clean install"
-
 script:
-- (eval "$TEST_COMMAND")
+    - ./gradlew --no-daemon --console=plain build

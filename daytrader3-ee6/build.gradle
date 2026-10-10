@@ -1,7 +1,6 @@
 apply plugin: 'ear'
 apply plugin: 'java'
 apply plugin: 'eclipse-wtp'
-apply plugin: 'maven-publish'
 
 // Use the Liberty Gradle plugin to run our functional tests
 apply plugin: 'liberty'
@@ -28,17 +27,6 @@ task copyDerbyLib(type: Copy) {
     from configurations.runtime
 }
 
-/* publishing {
-    publications {
-        mavenWar(MavenPublication) {
-            version '1.0-SNAPSHOT'
-            groupId 'net.wasdev.wlp.sample'
-            artifactId 'daytrader3-ee6'
-
-            from components.web
-        }
-    }
-} */
 
 // Add a functional test task that runs during the 'check' phase that uses the Liberty Gradle plugin
 // to launch Liberty and run the test classes in the fvt source set
