@@ -27,9 +27,10 @@ under `daytrader3-ee6-wlpcfg`.
 An external `-PlibertyRoot=...` must supply a compatible Liberty installation with
 `featureUtility`; the default pinned installation is the verified path.
 
-The inherited full `build` starts and stops the server through `fvt`. No functional
-test sources exist, so a successful `build` is not a trading-behavior check. Use
-the packaging tasks from the IDEA guide when only building the EAR. In the parent
+On the baseline-tests branch, full `build` runs the [isolated verification suite](Testing.md)
+through `fvt`. It starts/stops its own test server and leaves the interactive server
+and database intact. Use the packaging tasks from the IDEA guide when only building
+the EAR. The restoration revision itself still has the earlier empty `fvt` task. In the parent
 Migration workspace, local run configurations are **DayTrader Package**,
 **DayTrader Build**, **DayTrader Start**, and **DayTrader Stop**.
 

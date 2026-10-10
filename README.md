@@ -16,6 +16,7 @@ Maven build support was removed before adding the characterization tests.
 
 Browse the code to see what it does, or build and run it yourself:
 * [Building and running on the command line using Gradle](/docs/Using-cmd-line.md)
+* [Gradle tests, isolated fixtures, and application coverage](docs/Testing.md)
 * [Gradle wrapper and IntelliJ IDEA baseline](docs/Using-IDEA.md)
 * [Restored Gradle runtime and local database setup](docs/Restored-runtime.md)
 * [Building and running using Eclipse and WebSphere Development Tools (WDT)](/docs/Using-WDT.md)

@@ -1,0 +1,254 @@
+apply plugin: 'java'
+apply plugin: 'jacoco'
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+repositories { mavenCentral() }
+jacoco { toolVersion = '0.8.12' }
+configurations { serverAgent }
+dependencies {
+    implementation 'org.apache.derby:derby:10.10.1.1'
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.10.3'
+    testImplementation 'org.jsoup:jsoup:1.17.2'
+    serverAgent 'org.jacoco:org.jacoco.agent:0.8.12:runtime'
+}
+
+// No dependency on application classes: only the transport/fixture adapter changes.
+def earProject = project(':daytrader3-ee6')
+def testUser = file("$buildDir/liberty-user")
+def testOutput = file("$buildDir/liberty-output")
+def database = new File(testUser, 'shared/resources/data/tradedb')
+def coverage = file("$buildDir/jacoco/server.exec")
+def testPort = (findProperty('testHttpPort') ?: '19083').toString()
+def testHttpsPort = (findProperty('testHttpsPort') ?: '19443').toString()
+def testJmsPort = (findProperty('testJmsPort') ?: '17276').toString()
+def testJmsSslPort = (findProperty('testJmsSslPort') ?: '17286').toString()
+def javaHome = System.getProperty('java.home')
+if (new File(javaHome).name == 'jre') javaHome = new File(javaHome).parent
+
+def runtime = {
+    file(earProject.hasProperty('libertyRoot') ? earProject.property('libertyRoot') : "${earProject.buildDir}/wlp")
+}
+
+task prepareTestServer(dependsOn: [':daytrader3-ee6:ear', ':daytrader3-ee6:installDayTraderFeatures']) {
+    doLast {
+        // Never delete a fixture while its server is running or the requested ports are in use.
+        def probes = []
+        try {
+            [testPort, testHttpsPort, testJmsPort, testJmsSslPort].each { port ->
+                def socket = new java.net.ServerSocket()
+                probes << socket
+                // Permit rebinding after a stopped JVM's connections enter TIME_WAIT;
+                // an active listener still prevents this bind.
+                socket.reuseAddress = true
+                socket.bind(new java.net.InetSocketAddress('localhost', Integer.parseInt(port)))
+            }
+        } finally { probes.each { it.close() } }
+        def lock = new File(testOutput, 'daytrader3_Baseline/workarea/.sLock')
+        if (lock.exists()) {
+            def channel = java.nio.channels.FileChannel.open(lock.toPath(), java.nio.file.StandardOpenOption.WRITE)
+            try {
+                def held = channel.tryLock()
+                if (held == null) throw new GradleException('Test server is running; stopTestServer before resetting the fixture.')
+                held.release()
+            } finally { channel.close() }
+        }
+        delete testUser, testOutput, coverage, file("$buildDir/expected-state.properties"), file("$buildDir/runtime-classes")
+        def server = new File(testUser, 'servers/daytrader3_Baseline')
+        server.mkdirs()
+        def xml = rootProject.file('daytrader3-ee6-wlpcfg/servers/daytrader3_Sample/server.xml').text
+        xml = xml.replace('httpPort="9083"', 'httpPort="' + testPort + '"')
+                 .replace('httpsPort="9443"', 'httpsPort="' + testHttpsPort + '"')
+                 .replace('location="daytrader3-ee6.ear"', 'location="' + earProject.tasks.ear.archivePath.absolutePath + '"')
+                 .replace('</server>', '<wasJmsEndpoint wasJmsPort="' + testJmsPort + '" wasJmsSSLPort="' + testJmsSslPort + '" /></server>')
+        new File(server, 'server.xml').text = xml
+        copy {
+            from configurations.runtimeClasspath.filter { it.name == 'derby-10.10.1.1.jar' }
+            into new File(testUser, 'shared/resources/Daytrader3_SampleDerbyLibs')
+        }
+        coverage.parentFile.mkdirs()
+        new File(server, 'jvm.options').text = "-javaagent:${configurations.serverAgent.singleFile.absolutePath}=destfile=${coverage.absolutePath},append=true,includes=com.ibm.websphere.samples.daytrader.*,classdumpdir=${buildDir}/runtime-classes\n"
+    }
+}
+
+task loadFixture(type: JavaExec, dependsOn: [classes, prepareTestServer]) {
+    main = 'baseline.DerbyFixture'
+    workingDir buildDir
+    systemProperty 'derby.stream.error.file', file("$buildDir/derby-fixture.log").absolutePath
+    classpath = sourceSets.main.runtimeClasspath
+    args database.absolutePath, rootProject.file('daytrader3-ee6-web/src/main/webapp/dbscripts/derby/Table.ddl').absolutePath
+}
+
+task stopTestServer(type: Exec) {
+    group = 'Verification'
+    onlyIf { new File(testUser, 'servers/daytrader3_Baseline').exists() }
+    environment 'JAVA_HOME', javaHome
+    environment 'WLP_USER_DIR', testUser.absolutePath
+    environment 'WLP_OUTPUT_DIR', testOutput.absolutePath
+    doFirst {
+        commandLine new File(runtime(), "bin/server${System.getProperty('os.name').toLowerCase().contains('windows') ? '.bat' : ''}").absolutePath,
+                    'stop', 'daytrader3_Baseline'
+    }
+}
+
+def awaitReady = {
+    def deadline = System.nanoTime() + java.util.concurrent.TimeUnit.SECONDS.toNanos(90)
+    boolean ready = false
+    while (!ready && System.nanoTime() < deadline) {
+        try {
+            def connection = new URL("http://localhost:${testPort}/daytrader/").openConnection()
+            connection.connectTimeout = 1000
+            connection.readTimeout = 1000
+            ready = connection.responseCode == 200
+            connection.disconnect()
+        } catch (IOException ignored) { }
+        if (!ready) Thread.sleep(250)
+    }
+    if (!ready) throw new GradleException('Isolated DayTrader did not become ready within 90 seconds; inspect liberty-output.')
+}
+
+task startTestServer(type: Exec, dependsOn: loadFixture) {
+    group = 'Verification'
+    environment 'JAVA_HOME', javaHome
+    environment 'WLP_USER_DIR', testUser.absolutePath
+    environment 'WLP_OUTPUT_DIR', testOutput.absolutePath
+    doFirst {
+        commandLine new File(runtime(), "bin/server${System.getProperty('os.name').toLowerCase().contains('windows') ? '.bat' : ''}").absolutePath,
+                    'start', 'daytrader3_Baseline'
+    }
+    doLast awaitReady
+    finalizedBy stopTestServer
+}
+
+test {
+    useJUnitPlatform()
+    exclude '**/PersistedStateTest.class', '**/RestartPersistenceTest.class'
+    maxParallelForks = 1
+    jacoco.enabled = false // The application agent measures the server, not its HTTP client.
+    dependsOn startTestServer
+    finalizedBy stopTestServer
+    outputs.upToDateWhen { false }
+    outputs.cacheIf { false }
+    systemProperty 'daytrader.baseUrl', "http://localhost:${testPort}/daytrader"
+    systemProperty 'daytrader.expectedState', file("$buildDir/expected-state.properties").absolutePath
+}
+stopTestServer.mustRunAfter test
+
+// Restart the same fixture, rather than loading a new one, to verify durable state.
+task stopAfterRestart(type: Exec) {
+    environment 'JAVA_HOME', javaHome
+    environment 'WLP_USER_DIR', testUser.absolutePath
+    environment 'WLP_OUTPUT_DIR', testOutput.absolutePath
+    doFirst {
+        commandLine new File(runtime(), "bin/server${System.getProperty('os.name').toLowerCase().contains('windows') ? '.bat' : ''}").absolutePath,
+                    'stop', 'daytrader3_Baseline'
+    }
+}
+task restartTestServer(type: Exec, dependsOn: [test, stopTestServer]) {
+    environment 'JAVA_HOME', javaHome
+    environment 'WLP_USER_DIR', testUser.absolutePath
+    environment 'WLP_OUTPUT_DIR', testOutput.absolutePath
+    doFirst {
+        commandLine new File(runtime(), "bin/server${System.getProperty('os.name').toLowerCase().contains('windows') ? '.bat' : ''}").absolutePath,
+                    'start', 'daytrader3_Baseline'
+    }
+    doLast awaitReady
+    finalizedBy stopAfterRestart
+}
+task restartTest(type: Test, dependsOn: restartTestServer) {
+    description = 'Checks business state through fresh sessions after a Liberty restart.'
+    testClassesDirs = sourceSets.test.output.classesDirs
+    classpath = sourceSets.test.runtimeClasspath
+    useJUnitPlatform()
+    include '**/RestartPersistenceTest.class'
+    jacoco.enabled = false
+    outputs.upToDateWhen { false }
+    outputs.cacheIf { false }
+    systemProperty 'daytrader.baseUrl', "http://localhost:${testPort}/daytrader"
+    systemProperty 'daytrader.expectedState', file("$buildDir/expected-state.properties").absolutePath
+    finalizedBy stopAfterRestart
+}
+stopAfterRestart.mustRunAfter restartTest
+
+task persistedTest(type: Test, dependsOn: [restartTest, stopAfterRestart]) {
+    description = 'Checks trading state directly in Derby after Liberty releases the database.'
+    testClassesDirs = sourceSets.test.output.classesDirs
+    classpath = sourceSets.test.runtimeClasspath
+    useJUnitPlatform()
+    include '**/PersistedStateTest.class'
+    jacoco.enabled = false
+    outputs.upToDateWhen { false }
+    outputs.cacheIf { false }
+    systemProperty 'derby.stream.error.file', file("$buildDir/derby-inspection.log").absolutePath
+    systemProperty 'daytrader.database', database.absolutePath
+    systemProperty 'daytrader.expectedState', file("$buildDir/expected-state.properties").absolutePath
+}
+
+task prepareCoverageClasses(dependsOn: [persistedTest, ':daytrader3-ee6-ejb:test']) {
+    doLast {
+        def destination = file("$buildDir/coverage-classes")
+        delete destination
+        ['daytrader3-ee6-ejb', 'daytrader3-ee6-web', 'daytrader3-ee6-rest'].each { name ->
+            def original = project(":" + name).sourceSets.main.output.classesDirs
+            copy { from original; into new File(destination, name) }
+            original.asFileTree.matching { include '**/*.class' }.each { compiled ->
+                def relative = compiled.absolutePath.substring(original.files.find { compiled.absolutePath.startsWith(it.absolutePath + File.separator) }.absolutePath.length() + 1)
+                def directory = new File(file("$buildDir/runtime-classes"), new File(relative).parent)
+                def stem = compiled.name.substring(0, compiled.name.length() - 6)
+                def dumped = directory.exists() ? directory.listFiles().findAll { it.name.startsWith(stem + '.') && it.name.endsWith('.class') } : []
+                if (dumped.size() > 1) throw new GradleException("Ambiguous runtime coverage classes for " + relative)
+                if (dumped.size() == 1) {
+                    copy { from dumped[0]; into new File(new File(destination, name), new File(relative).parent); rename { compiled.name } }
+                }
+            }
+        }
+    }
+}
+
+task applicationCoverage(type: JacocoReport, dependsOn: prepareCoverageClasses) {
+    description = 'Aggregates server integration coverage and EJB calculation unit coverage.'
+    def modules = [project(':daytrader3-ee6-ejb'), project(':daytrader3-ee6-web'), project(':daytrader3-ee6-rest')]
+    classDirectories = files(modules.collect { file("$buildDir/coverage-classes/${it.name}") })
+    sourceDirectories = files(modules.collect { it.sourceSets.main.allJava.srcDirs })
+    executionData = files(coverage, project(':daytrader3-ee6-ejb').file('build/jacoco/test.exec'))
+    reports {
+        html.enabled = true
+        xml.enabled = true
+        html.destination = file("$buildDir/reports/coverage")
+        xml.destination = file("$buildDir/reports/coverage.xml")
+    }
+    doFirst {
+        if (!coverage.exists() || coverage.length() == 0) throw new GradleException('No application-JVM coverage was collected.')
+    }
+}
+check.dependsOn applicationCoverage
+
+// OpenJPA adds methods without source lines. Summarize source-line branches separately
+// so generated persistence plumbing does not inflate the migration coverage denominator.
+task coverageSummary(dependsOn: applicationCoverage) {
+    doLast {
+        def parser = new XmlParser(false, false, true)
+        parser.setFeature('http://apache.org/xml/features/nonvalidating/load-external-dtd', false)
+        def report = parser.parse(file("$buildDir/reports/coverage.xml"))
+        def result = [scope: 'Application source lines and branches with source-line metadata; OpenJPA generated methods excluded', modules: [:], criticalClasses: [:]]
+        def counters = { lines ->
+            def coveredLines = lines.count { Integer.parseInt(it.@ci) > 0 }
+            def coveredBranches = lines.sum { Integer.parseInt(it.@cb) } ?: 0
+            def missedBranches = lines.sum { Integer.parseInt(it.@mb) } ?: 0
+            [linesCovered: coveredLines, linesTotal: lines.size(), branchesCovered: coveredBranches, branchesTotal: coveredBranches + missedBranches]
+        }
+        ['EJB', 'web', 'REST'].each { name ->
+            def packages = report.'package'.findAll { p ->
+                name == 'web' ? p.@name.contains('/daytrader/web') : name == 'REST' ? p.@name.contains('/daytrader/rest') : !p.@name.contains('/daytrader/web') && !p.@name.contains('/daytrader/rest')
+            }
+            result.modules[name] = counters(packages.collectMany { it.sourcefile.collectMany { it.line } })
+        }
+        ['TradeSLSBBean', 'TradeDirect', 'TradeAppServlet', 'TradeServletAction', 'FinancialUtils', 'DTBroker3MDB', 'DTStreamer3MDB'].each { name ->
+            def source = report.'package'.collectMany { it.sourcefile }.find { it.@name == name + '.java' }
+            if (source != null) result.criticalClasses[name] = counters(source.line)
+        }
+        file("$buildDir/reports/coverage-summary.json").text = groovy.json.JsonOutput.prettyPrint(groovy.json.JsonOutput.toJson(result)) + '\n'
+        logger.lifecycle('Application source coverage summary: ' + result.modules)
+    }
+}
+check.dependsOn coverageSummary

@@ -17,3 +17,10 @@ dependencies {
 } 
 
 sourceCompatibility = 1.7
+
+apply plugin: 'jacoco'
+jacoco { toolVersion = '0.8.12' }
+dependencies {
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.10.3'
+}
+test { useJUnitPlatform() }

@@ -14,7 +14,7 @@ Installing WDT on Eclipse is as simple as a drag-and-drop, but the process is ex
 [wasdev-wdt]: https://developer.ibm.com/wasdev/downloads/liberty-profile-using-eclipse/
 
 ### Clone Git Repo
-:pushpin: [Switch to cmd line example](/docs/Using-cmd-line.md/#clone-git-repo)
+:pushpin: [Switch to cmd line example](/docs/Using-cmd-line.md#obtain-the-fork)
 
 If the sample git repository hasn't been cloned yet, WDT has git tools integrated into the IDE:
 
@@ -27,7 +27,7 @@ If the sample git repository hasn't been cloned yet, WDT has git tools integrate
 5.  The "sample.daytrader3 [master]" repo should appear in the view
 
 ### Building the sample in Eclipse
-:pushpin: [Switch to cmd line example](/docs/Using-cmd-line.md/#building-the-sample)
+:pushpin: [Switch to cmd line example](/docs/Using-cmd-line.md#package-the-application)
 
 This fork uses [Gradle](#building-with-gradle) as its sole build. Select the
 checked-in wrapper and Java 8 in Buildship. The historical Eclipse/WDT setup
@@ -56,11 +56,11 @@ This assumes you have the Gradle [Buildship](https://projects.eclipse.org/projec
 ###### Run Gradle build
 
 1. Go to the *Gradle Tasks* view in Eclipse and navigate to the *sample.daytrader3* project
-2. Double click: build. This currently starts and stops Liberty through the empty
-   functional-test lifecycle; see [runtime setup](Restored-runtime.md).
+2. Double click: build. This runs the [isolated verification suite](Testing.md);
+   see [runtime setup](Restored-runtime.md) for interactive server use.
 
 ### Running the application locally
-:pushpin: [Switch to cmd line example](/docs/Using-cmd-line.md/#running-the-application-locally)
+:pushpin: [Switch to cmd line example](/docs/Using-cmd-line.md#run-the-application)
 
 Pre-requisite: [Download WAS Liberty](/docs/Downloading-WAS-Liberty.md)
 
