@@ -13,6 +13,8 @@ DayTrader is an end-to-end benchmark and performance sample application. It prov
 
 Browse the code to see what it does, or build and run it yourself:
 * [Building and running on the command line using Maven and Gradle](/docs/Using-cmd-line.md)
+* [Gradle wrapper and IntelliJ IDEA baseline](docs/Using-IDEA.md)
+* [Restored Gradle runtime and local database setup](docs/Restored-runtime.md)
 * [Building and running using Eclipse and WebSphere Development Tools (WDT)](/docs/Using-WDT.md)
 * [Downloading WAS Liberty](/docs/Downloading-WAS-Liberty.md)
 

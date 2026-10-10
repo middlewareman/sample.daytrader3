@@ -1,5 +1,9 @@
 ## Building and running the sample using the command line
 
+For the `restore/runtime` branch, use the checked-in wrapper with Java 8 and the
+[restored runtime instructions](Restored-runtime.md). They replace the historical
+unversioned Gradle command and sample-asset installation below.
+
 ### Clone Git Repo
 :pushpin: [Switch to Eclipse example](/docs/Using-WDT.md/#clone-git-repo)
 
@@ -68,4 +72,3 @@ $ /path/to/wlp/bin/server start daytrader3_Sample
 ```bash
 $ tail -f ${WLP_USER_DIR}/servers/daytrader3_Sample/logs/console.log
 ```
-
