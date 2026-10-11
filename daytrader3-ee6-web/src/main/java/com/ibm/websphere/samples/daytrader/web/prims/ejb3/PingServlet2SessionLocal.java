@@ -1,51 +1,53 @@
 /**
- *  Licensed to the Apache Software Foundation (ASF) under one or more
- *  contributor license agreements.  See the NOTICE file distributed with
- *  this work for additional information regarding copyright ownership.
- *  The ASF licenses this file to You under the Apache License, Version 2.0
- *  (the "License"); you may not use this file except in compliance with
- *  the License.  You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package com.ibm.websphere.samples.daytrader.web.prims.ejb3;
 
 import java.io.*;
-import javax.servlet.*;
-import javax.servlet.http.*;
+
+import jakarta.servlet.*;
+import jakarta.servlet.http.*;
+
 import javax.naming.*;
 // import javax.rmi.PortableRemoteObject;
 
-import javax.servlet.annotation.WebServlet;
+import jakarta.servlet.annotation.WebServlet;
 
-import javax.ejb.EJB;
+import jakarta.ejb.EJB;
 
 import com.ibm.websphere.samples.daytrader.TradeConfig;
 import com.ibm.websphere.samples.daytrader.ejb3.TradeSLSBLocal;
 import com.ibm.websphere.samples.daytrader.util.Log;
 
 /**
- * 
+ *
  * This primitive is designed to run inside the TradeApplication and relies upon
  * the {@link trade_client.TradeConfig} class to set configuration parameters.
  * PingServlet2SessionEJB tests key functionality of a servlet call to a
  * stateless SessionEJB. This servlet makes use of the Stateless Session EJB
  * {@link trade.Trade} by calling calculateInvestmentReturn with three random
  * numbers.
- * 
+ *
  */
 @WebServlet(name = "ejb3.PingServlet2SessionLocal", urlPatterns = {"/ejb3/PingServlet2SessionLocal"})
 public class PingServlet2SessionLocal extends HttpServlet {
 
     private static final long serialVersionUID = 6854998080392777053L;
 
-	private static String initTime;
+    private static String initTime;
 
     private static int hitCount;
 
@@ -111,10 +113,10 @@ public class PingServlet2SessionLocal extends HttpServlet {
 
         if (tradeSLSBLocal == null) {
             Log.error("PingServlet2SessionLocal:init - Injection of TradeSLSBLocal failed - performing JNDI lookup!");
-            
+
             try {
                 InitialContext context = new InitialContext();
-                tradeSLSBLocal = (TradeSLSBLocal) context.lookup("java:comp/env/web/ejb/local/TradeSLSBBean");                
+                tradeSLSBLocal = (TradeSLSBLocal) context.lookup("java:comp/env/web/ejb/local/TradeSLSBBean");
             } catch (Exception ex) {
                 Log.error("PingServlet2SessionLocal:init - Lookup of TradeSLSBLocal failed!!!");
                 ex.printStackTrace();

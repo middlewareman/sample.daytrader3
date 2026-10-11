@@ -1,24 +1,24 @@
 /**
- *  Licensed to the Apache Software Foundation (ASF) under one or more
- *  contributor license agreements.  See the NOTICE file distributed with
- *  this work for additional information regarding copyright ownership.
- *  The ASF licenses this file to You under the Apache License, Version 2.0
- *  (the "License"); you may not use this file except in compliance with
- *  the License.  You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package com.ibm.websphere.samples.daytrader.web;
 
-import javax.servlet.*;
-import javax.servlet.http.*;
-import javax.servlet.annotation.WebServlet;
+import jakarta.servlet.*;
+import jakarta.servlet.http.*;
+import jakarta.servlet.annotation.WebServlet;
 
 
 import java.io.IOException;
@@ -27,7 +27,7 @@ import com.ibm.websphere.samples.daytrader.*;
 import com.ibm.websphere.samples.daytrader.util.*;
 
 /**
- * 
+ *
  * TradeAppServlet provides the standard web interface to Trade and can be
  * accessed with the Go Trade! link. Driving benchmark load using this interface
  * requires a sophisticated web load generator that is capable of filling HTML
@@ -39,7 +39,7 @@ public class TradeAppServlet extends HttpServlet {
 
     private static final long serialVersionUID = 481530522846648373L;
 
-	/**
+    /**
      * Servlet initialization method.
      */
     public void init(ServletConfig config) throws ServletException {
@@ -61,7 +61,7 @@ public class TradeAppServlet extends HttpServlet {
 
     /**
      * Returns a string that contains information about TradeScenarioServlet
-     * 
+     *
      * @return The servlet information
      */
     public java.lang.String getServletInfo() {
@@ -70,39 +70,33 @@ public class TradeAppServlet extends HttpServlet {
 
     /**
      * Process incoming HTTP GET requests
-     * 
-     * @param request
-     *            Object that encapsulates the request to the servlet
-     * @param response
-     *            Object that encapsulates the response from the servlet
+     *
+     * @param request  Object that encapsulates the request to the servlet
+     * @param response Object that encapsulates the response from the servlet
      */
-    public void doGet(javax.servlet.http.HttpServletRequest request,
-            javax.servlet.http.HttpServletResponse response)
+    public void doGet(jakarta.servlet.http.HttpServletRequest request,
+                      jakarta.servlet.http.HttpServletResponse response)
             throws ServletException, IOException {
         performTask(request, response);
     }
 
     /**
      * Process incoming HTTP POST requests
-     * 
-     * @param request
-     *            Object that encapsulates the request to the servlet
-     * @param response
-     *            Object that encapsulates the response from the servlet
+     *
+     * @param request  Object that encapsulates the request to the servlet
+     * @param response Object that encapsulates the response from the servlet
      */
-    public void doPost(javax.servlet.http.HttpServletRequest request,
-            javax.servlet.http.HttpServletResponse response)
+    public void doPost(jakarta.servlet.http.HttpServletRequest request,
+                       jakarta.servlet.http.HttpServletResponse response)
             throws ServletException, IOException {
         performTask(request, response);
     }
 
     /**
      * Main service method for TradeAppServlet
-     * 
-     * @param request
-     *            Object that encapsulates the request to the servlet
-     * @param response
-     *            Object that encapsulates the response from the servlet
+     *
+     * @param request  Object that encapsulates the request to the servlet
+     * @param response Object that encapsulates the response from the servlet
      */
     public void performTask(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {

@@ -15,25 +15,25 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 -->
-<persistence xmlns="http://java.sun.com/xml/ns/persistence" version="2.0">
+<persistence xmlns="https://jakarta.ee/xml/ns/persistence" version="3.2">
 
     <persistence-unit transaction-type="JTA" name="daytrader">
-        <jta-data-source>jdbc/TradeDataSource</jta-data-source>  
-        <non-jta-data-source>jdbc/NoTxTradeDataSource</non-jta-data-source> 
-        
+        <jta-data-source>jdbc/TradeDataSource</jta-data-source>
+        <non-jta-data-source>jdbc/NoTxTradeDataSource</non-jta-data-source>
+
         <class>com.ibm.websphere.samples.daytrader.AccountDataBean</class>
         <class>com.ibm.websphere.samples.daytrader.AccountProfileDataBean</class>
         <class>com.ibm.websphere.samples.daytrader.HoldingDataBean</class>
         <class>com.ibm.websphere.samples.daytrader.OrderDataBean</class>
         <class>com.ibm.websphere.samples.daytrader.QuoteDataBean</class>
         <exclude-unlisted-classes>true</exclude-unlisted-classes>
-        
-        <!-- Enables JPA L2 Caching on all entities 
-        <shared-cache-mode>ALL</shared-cache-mode> -->
-        
-        <properties>          
+
+        <!-- JDBC paths and inverse collections must observe committed database state. -->
+        <shared-cache-mode>NONE</shared-cache-mode>
+
+        <properties>
         </properties>
-        
-        
+
+
     </persistence-unit>
 </persistence>

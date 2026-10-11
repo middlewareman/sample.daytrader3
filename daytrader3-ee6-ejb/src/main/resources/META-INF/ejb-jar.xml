@@ -15,15 +15,16 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 -->
-<ejb-jar version="3.1"
-    xmlns="http://java.sun.com/xml/ns/javaee"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/ejb-jar_3_1.xsd"> 
+<ejb-jar version="4.0"
+         xmlns="https://jakarta.ee/xml/ns/jakartaee"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="https://jakarta.ee/xml/ns/jakartaee https://jakarta.ee/xml/ns/jakartaee/ejb-jar_4_0.xsd">
     <display-name>DayTrader Enterprise Bean Definitions</display-name>
 
     <!-- 
         All EJB 3.1 properties and attributes have been applied to the various DayTrader 
         entity, session and message driven beans using annotations. The inline annotations 
         can be overriden by modifing this file. 
-    -->    
-    
+    -->
+
 </ejb-jar>

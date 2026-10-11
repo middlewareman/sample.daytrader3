@@ -1,61 +1,61 @@
 /**
- *  Licensed to the Apache Software Foundation (ASF) under one or more
- *  contributor license agreements.  See the NOTICE file distributed with
- *  this work for additional information regarding copyright ownership.
- *  The ASF licenses this file to You under the Apache License, Version 2.0
- *  (the "License"); you may not use this file except in compliance with
- *  the License.  You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package com.ibm.websphere.samples.daytrader;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 
 import com.ibm.websphere.samples.daytrader.util.Log;
 
 @Entity(name = "accountprofileejb")
 @Table(name = "accountprofileejb")
-@NamedQueries( {
+@NamedQueries({
         @NamedQuery(name = "accountprofileejb.findByAddress", query = "SELECT a FROM accountprofileejb a WHERE a.address = :address"),
         @NamedQuery(name = "accountprofileejb.findByPasswd", query = "SELECT a FROM accountprofileejb a WHERE a.passwd = :passwd"),
         @NamedQuery(name = "accountprofileejb.findByUserid", query = "SELECT a FROM accountprofileejb a WHERE a.userID = :userid"),
         @NamedQuery(name = "accountprofileejb.findByEmail", query = "SELECT a FROM accountprofileejb a WHERE a.email = :email"),
         @NamedQuery(name = "accountprofileejb.findByCreditcard", query = "SELECT a FROM accountprofileejb a WHERE a.creditCard = :creditcard"),
         @NamedQuery(name = "accountprofileejb.findByFullname", query = "SELECT a FROM accountprofileejb a WHERE a.fullName = :fullname")
-    })
+})
 public class AccountProfileDataBean implements java.io.Serializable {
 
     /* Accessor methods for persistent fields */
 
     private static final long serialVersionUID = 2794584136675420624L;
 
-	@Id
+    @Id
     @Column(name = "USERID", nullable = false)
     private String userID;              /* userID */
-    
+
     @Column(name = "PASSWD")
     private String passwd;              /* password */
-    
+
     @Column(name = "FULLNAME")
     private String fullName;            /* fullName */
-    
+
     @Column(name = "ADDRESS")
     private String address;             /* address */
-    
+
     @Column(name = "EMAIL")
     private String email;               /* email */
-    
+
     @Column(name = "CREDITCARD")
     private String creditCard;          /* creditCard */
-    
-    @OneToOne(mappedBy="profile", fetch=FetchType.LAZY)
+
+    @OneToOne(mappedBy = "profile", fetch = FetchType.LAZY)
     private AccountDataBean account;
 
 //    @Version
@@ -65,11 +65,11 @@ public class AccountProfileDataBean implements java.io.Serializable {
     }
 
     public AccountProfileDataBean(String userID,
-            String password,
-            String fullName,
-            String address,
-            String email,
-            String creditCard) {
+                                  String password,
+                                  String fullName,
+                                  String address,
+                                  String email,
+                                  String creditCard) {
         setUserID(userID);
         setPassword(password);
         setFullName(fullName);
@@ -168,7 +168,7 @@ public class AccountProfileDataBean implements java.io.Serializable {
     public void setAccount(AccountDataBean account) {
         this.account = account;
     }
-    
+
     @Override
     public int hashCode() {
         int hash = 0;
@@ -182,7 +182,7 @@ public class AccountProfileDataBean implements java.io.Serializable {
         if (!(object instanceof AccountProfileDataBean)) {
             return false;
         }
-        AccountProfileDataBean other = (AccountProfileDataBean)object;
+        AccountProfileDataBean other = (AccountProfileDataBean) object;
         if (this.userID != other.userID && (this.userID == null || !this.userID.equals(other.userID))) return false;
         return true;
     }

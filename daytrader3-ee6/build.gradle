@@ -37,9 +37,9 @@ task fvt {
 
 repositories { mavenCentral(); }
 dependencies {
-    // Pin the runtime separately from the Java EE 6 features used by server.xml.
-    if (!project.hasProperty('libertyRoot')) {
-        libertyRuntime 'com.ibm.websphere.appserver.runtime:wlp-javaee7:24.0.0.9@zip'
+    // Pin the runtime separately from the Jakarta EE 11 features used by server.xml.
+    if (!project.hasProperty('daytraderLibertyHome')) {
+        libertyRuntime 'io.openliberty:openliberty-runtime:26.0.0.9@zip'
     }
     deploy project(path: ':daytrader3-ee6-ejb', configuration: 'archives')
     deploy project(path: ':daytrader3-ee6-web', configuration: 'archives')
@@ -50,7 +50,8 @@ deploy.dependsOn 'ear'
 libertyStart.mustRunAfter 'deploy'
 
 liberty {
-    installDir = owner.hasProperty('libertyRoot') ? "${libertyRoot}" : null
+    baseDir = "${buildDir}/jakarta-runtime"
+    installDir = project.findProperty('daytraderLibertyHome')?.toString()
     // Upstream committed generated server state; keep new logs/state in build/.
     userDir = rootProject.file('daytrader3-ee6-wlpcfg').absolutePath
     server {
@@ -65,24 +66,23 @@ liberty {
 // already in this checkout. Install the exact features at the runtime's version.
 task installDayTraderFeatures(type: Exec, dependsOn: installLiberty) {
     group = 'Liberty'
-    description = 'Installs the Java EE 6 features required by DayTrader.'
+    description = 'Installs the Jakarta EE 11 features required by DayTrader.'
     onlyIf {
-        def runtimeDir = liberty.installDir ?: "${buildDir}/wlp"
-        !['ejbLite-3.1', 'jsf-2.0', 'jaxrs-1.1', 'jpa-2.0',
-          'jmsMdb-3.1', 'wasJmsServer-1.0', 'wasJmsClient-1.1'].every {
-            new File(runtimeDir, "lib/features/com.ibm.websphere.appserver.${it}.mf").exists()
+        def runtimeDir = liberty.installDir ?: "${buildDir}/jakarta-runtime/wlp"
+        !['jakartaee-11.0', 'xmlBinding-4.0'].every {
+            new File(runtimeDir, "lib/features/io.openliberty.${it}.mf").exists()
         }
     }
     doFirst {
-        def runtimeDir = liberty.installDir ?: "${buildDir}/wlp"
+        def runtimeDir = liberty.installDir ?: "${buildDir}/jakarta-runtime/wlp"
         def suffix = System.getProperty('os.name').toLowerCase().contains('windows') ? '.bat' : ''
         executable = new File(runtimeDir, "bin/featureUtility${suffix}").absolutePath
-        environment 'JAVA_HOME', javaToolchains.launcherFor { languageVersion = JavaLanguageVersion.of(8) }.get().metadata.installationPath.asFile.absolutePath
+        environment 'JAVA_HOME', javaToolchains.launcherFor { languageVersion = JavaLanguageVersion.of(21) }.get().metadata.installationPath.asFile.absolutePath
     }
-    args 'installFeature', 'ejbLite-3.1', 'jsf-2.0', 'jaxrs-1.1', 'jpa-2.0',
-         'jmsMdb-3.1', 'wasJmsServer-1.0', 'wasJmsClient-1.1'
+    args 'installFeature', 'jakartaee-11.0', 'xmlBinding-4.0'
 }
 
+installLiberty.onlyIf { !project.hasProperty('daytraderLibertyHome') }
 libertyStart.dependsOn installDayTraderFeatures, copyDerbyLib, deploy
 
 // Normal builds package the EAR; deployment is explicit through libertyStart.

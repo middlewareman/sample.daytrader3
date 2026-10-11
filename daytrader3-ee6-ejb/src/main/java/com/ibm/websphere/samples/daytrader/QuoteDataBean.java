@@ -1,52 +1,52 @@
 /**
- *  Licensed to the Apache Software Foundation (ASF) under one or more
- *  contributor license agreements.  See the NOTICE file distributed with
- *  this work for additional information regarding copyright ownership.
- *  The ASF licenses this file to You under the Apache License, Version 2.0
- *  (the "License"); you may not use this file except in compliance with
- *  the License.  You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package com.ibm.websphere.samples.daytrader;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.NamedNativeQueries;
-import javax.persistence.NamedNativeQuery;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
-import javax.persistence.Table;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.NamedNativeQueries;
+import jakarta.persistence.NamedNativeQuery;
+import jakarta.persistence.NamedQueries;
+import jakarta.persistence.NamedQuery;
+import jakarta.persistence.Table;
 
 import com.ibm.websphere.samples.daytrader.util.Log;
 
 @Entity(name = "quoteejb")
 @Table(name = "quoteejb")
 @NamedQueries({
-               @NamedQuery(name = "quoteejb.allQuotes", query = "SELECT q FROM quoteejb q"),
-               @NamedQuery(name = "quoteejb.quotesByChange", query = "SELECT q FROM quoteejb q WHERE q.symbol LIKE 's:1__' ORDER BY q.change1 DESC"),
-               @NamedQuery(name = "quoteejb.findByLow", query = "SELECT q FROM quoteejb q WHERE q.low = :low"),
-               @NamedQuery(name = "quoteejb.findByOpen1", query = "SELECT q FROM quoteejb q WHERE q.open1 = :open1"),
-               @NamedQuery(name = "quoteejb.findByVolume", query = "SELECT q FROM quoteejb q WHERE q.volume = :volume"),
-               @NamedQuery(name = "quoteejb.findByPrice", query = "SELECT q FROM quoteejb q WHERE q.price = :price"),
-               @NamedQuery(name = "quoteejb.findByHigh", query = "SELECT q FROM quoteejb q WHERE q.high = :high"),
-               @NamedQuery(name = "quoteejb.findByCompanyname", query = "SELECT q FROM quoteejb q WHERE q.companyName = :companyname"),
-               @NamedQuery(name = "quoteejb.findBySymbol", query = "SELECT q FROM quoteejb q WHERE q.symbol = :symbol"),
-               @NamedQuery(name = "quoteejb.findByChange1", query = "SELECT q FROM quoteejb q WHERE q.change1 = :change1")
+        @NamedQuery(name = "quoteejb.allQuotes", query = "SELECT q FROM quoteejb q"),
+        @NamedQuery(name = "quoteejb.quotesByChange", query = "SELECT q FROM quoteejb q WHERE q.symbol LIKE 's:1__' ORDER BY q.change1 DESC"),
+        @NamedQuery(name = "quoteejb.findByLow", query = "SELECT q FROM quoteejb q WHERE q.low = :low"),
+        @NamedQuery(name = "quoteejb.findByOpen1", query = "SELECT q FROM quoteejb q WHERE q.open1 = :open1"),
+        @NamedQuery(name = "quoteejb.findByVolume", query = "SELECT q FROM quoteejb q WHERE q.volume = :volume"),
+        @NamedQuery(name = "quoteejb.findByPrice", query = "SELECT q FROM quoteejb q WHERE q.price = :price"),
+        @NamedQuery(name = "quoteejb.findByHigh", query = "SELECT q FROM quoteejb q WHERE q.high = :high"),
+        @NamedQuery(name = "quoteejb.findByCompanyname", query = "SELECT q FROM quoteejb q WHERE q.companyName = :companyname"),
+        @NamedQuery(name = "quoteejb.findBySymbol", query = "SELECT q FROM quoteejb q WHERE q.symbol = :symbol"),
+        @NamedQuery(name = "quoteejb.findByChange1", query = "SELECT q FROM quoteejb q WHERE q.change1 = :change1")
 })
 @NamedNativeQueries({
-                     @NamedNativeQuery(name = "quoteejb.quoteForUpdate", query = "select * from quoteejb q where q.symbol=? for update",
-                                       resultClass = com.ibm.websphere.samples.daytrader.QuoteDataBean.class)
+        @NamedNativeQuery(name = "quoteejb.quoteForUpdate", query = "select * from quoteejb q where q.symbol=? for update",
+                resultClass = com.ibm.websphere.samples.daytrader.QuoteDataBean.class)
 })
 public class QuoteDataBean implements Serializable {
 
@@ -89,7 +89,8 @@ public class QuoteDataBean implements Serializable {
 
     /* Accessor methods for relationship fields are not kept in the DataBean */
 
-    public QuoteDataBean() {}
+    public QuoteDataBean() {
+    }
 
     public QuoteDataBean(String symbol, String companyName, double volume,
                          BigDecimal price, BigDecimal open, BigDecimal low,
@@ -106,14 +107,14 @@ public class QuoteDataBean implements Serializable {
 
     public static QuoteDataBean getRandomInstance() {
         return new QuoteDataBean(
-                        TradeConfig.rndSymbol(), //symbol
-                        TradeConfig.rndSymbol() + " Incorporated", //Company Name
-                        TradeConfig.rndFloat(100000), //volume
-                        TradeConfig.rndBigDecimal(1000.0f), //price
-                        TradeConfig.rndBigDecimal(1000.0f), //open1
-                        TradeConfig.rndBigDecimal(1000.0f), //low
-                        TradeConfig.rndBigDecimal(1000.0f), //high
-                        TradeConfig.rndFloat(100000) //volume
+                TradeConfig.rndSymbol(), //symbol
+                TradeConfig.rndSymbol() + " Incorporated", //Company Name
+                TradeConfig.rndFloat(100000), //volume
+                TradeConfig.rndBigDecimal(1000.0f), //price
+                TradeConfig.rndBigDecimal(1000.0f), //open1
+                TradeConfig.rndBigDecimal(1000.0f), //low
+                TradeConfig.rndBigDecimal(1000.0f), //high
+                TradeConfig.rndFloat(100000) //volume
         );
     }
 
@@ -125,24 +126,24 @@ public class QuoteDataBean implements Serializable {
     @Override
     public String toString() {
         return "\n\tQuote Data for: " + getSymbol()
-               + "\n\t\t companyName: " + getCompanyName()
-               + "\n\t\t      volume: " + getVolume()
-               + "\n\t\t       price: " + getPrice()
-               + "\n\t\t        open1: " + getOpen()
-               + "\n\t\t         low: " + getLow()
-               + "\n\t\t        high: " + getHigh()
-               + "\n\t\t      change1: " + getChange();
+                + "\n\t\t companyName: " + getCompanyName()
+                + "\n\t\t      volume: " + getVolume()
+                + "\n\t\t       price: " + getPrice()
+                + "\n\t\t        open1: " + getOpen()
+                + "\n\t\t         low: " + getLow()
+                + "\n\t\t        high: " + getHigh()
+                + "\n\t\t      change1: " + getChange();
     }
 
     public String toHTML() {
         return "<BR>Quote Data for: " + getSymbol()
-               + "<LI> companyName: " + getCompanyName() + "</LI>"
-               + "<LI>      volume: " + getVolume() + "</LI>"
-               + "<LI>       price: " + getPrice() + "</LI>"
-               + "<LI>        open1: " + getOpen() + "</LI>"
-               + "<LI>         low: " + getLow() + "</LI>"
-               + "<LI>        high: " + getHigh() + "</LI>"
-               + "<LI>      change1: " + getChange() + "</LI>";
+                + "<LI> companyName: " + getCompanyName() + "</LI>"
+                + "<LI>      volume: " + getVolume() + "</LI>"
+                + "<LI>       price: " + getPrice() + "</LI>"
+                + "<LI>        open1: " + getOpen() + "</LI>"
+                + "<LI>         low: " + getLow() + "</LI>"
+                + "<LI>        high: " + getHigh() + "</LI>"
+                + "<LI>      change1: " + getChange() + "</LI>";
     }
 
     public void print() {

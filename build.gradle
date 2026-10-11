@@ -2,9 +2,9 @@ allprojects {
     apply plugin: 'eclipse'
     plugins.withId('java') {
         java {
-            toolchain { languageVersion = JavaLanguageVersion.of(8) }
-            sourceCompatibility = JavaVersion.VERSION_1_8
-            targetCompatibility = JavaVersion.VERSION_1_8
+            toolchain { languageVersion = JavaLanguageVersion.of(project.name == 'daytrader3-verification' ? 8 : 21) }
+            sourceCompatibility = project.name == 'daytrader3-verification' ? JavaVersion.VERSION_1_8 : JavaVersion.VERSION_21
+            targetCompatibility = project.name == 'daytrader3-verification' ? JavaVersion.VERSION_1_8 : JavaVersion.VERSION_21
         }
     }
 }

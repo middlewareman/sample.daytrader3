@@ -11,31 +11,32 @@
 
 <!-- This program may be used, executed, copied, modified and distributed without royalty for the purpose 
     of developing, using, marketing, or distributing. -->
-<web-app id="addressbook-server" version="3.0" xmlns="http://java.sun.com/xml/ns/javaee"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd">
+<web-app id="addressbook-server" version="6.1" xmlns="https://jakarta.ee/xml/ns/jakartaee"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="https://jakarta.ee/xml/ns/jakartaee https://jakarta.ee/xml/ns/jakartaee/web-app_6_1.xsd">
     <servlet>
-        <servlet-name>javax.ws.rs.core.Application</servlet-name>
+        <servlet-name>jakarta.ws.rs.core.Application</servlet-name>
         <load-on-startup>1</load-on-startup>
     </servlet>
     <servlet-mapping>
-        <servlet-name>javax.ws.rs.core.Application</servlet-name>
+        <servlet-name>jakarta.ws.rs.core.Application</servlet-name>
         <url-pattern>/*</url-pattern>
     </servlet-mapping>
 </web-app>
 
-<!-- <web-app id="addressbook-server" version="3.0" xmlns="http://java.sun.com/xml/ns/javaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd">
-        <servlet>
-            <servlet-name>AddressBook</servlet-name>
-            <servlet-class>org.jboss.resteasy.plugins.server.servlet.HttpServletDispatcher</servlet-class>
-            <init-param>
-                <param-name>javax.ws.rs.Application</param-name>
-                <param-value>com.ibm.websphere.samples.daytrader.rest.AddressApplication</param-value>
-            </init-param>
-            <load-on-startup>1</load-on-startup>
-        </servlet>
+        <!-- <web-app id="addressbook-server" version="6.1" xmlns="https://jakarta.ee/xml/ns/jakartaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="https://jakarta.ee/xml/ns/jakartaee https://jakarta.ee/xml/ns/jakartaee/web-app_6_1.xsd">
+                <servlet>
+                    <servlet-name>AddressBook</servlet-name>
+                    <servlet-class>org.jboss.resteasy.plugins.server.servlet.HttpServletDispatcher</servlet-class>
+                    <init-param>
+                        <param-name>jakarta.ws.rs.Application</param-name>
+                        <param-value>com.ibm.websphere.samples.daytrader.rest.AddressApplication</param-value>
+                    </init-param>
+                    <load-on-startup>1</load-on-startup>
+                </servlet>
 
-        <servlet-mapping>
-            <servlet-name>AddressBook</servlet-name>
-            <url-pattern>/*</url-pattern>
-        </servlet-mapping>
-</web-app> -->
+                <servlet-mapping>
+                    <servlet-name>AddressBook</servlet-name>
+                    <url-pattern>/*</url-pattern>
+                </servlet-mapping>
+        </web-app> -->

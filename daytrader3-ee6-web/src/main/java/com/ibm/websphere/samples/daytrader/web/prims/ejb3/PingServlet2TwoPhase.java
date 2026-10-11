@@ -1,27 +1,28 @@
 /**
- *  Licensed to the Apache Software Foundation (ASF) under one or more
- *  contributor license agreements.  See the NOTICE file distributed with
- *  this work for additional information regarding copyright ownership.
- *  The ASF licenses this file to You under the Apache License, Version 2.0
- *  (the "License"); you may not use this file except in compliance with
- *  the License.  You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package com.ibm.websphere.samples.daytrader.web.prims.ejb3;
 
 import java.io.*;
-import javax.servlet.*;
-import javax.servlet.http.*;
-import javax.servlet.annotation.WebServlet;
 
-import javax.ejb.EJB;
+import jakarta.servlet.*;
+import jakarta.servlet.http.*;
+import jakarta.servlet.annotation.WebServlet;
+
+import jakarta.ejb.EJB;
 
 import com.ibm.websphere.samples.daytrader.QuoteDataBean;
 import com.ibm.websphere.samples.daytrader.TradeConfig;
@@ -29,19 +30,19 @@ import com.ibm.websphere.samples.daytrader.ejb3.TradeSLSBLocal;
 import com.ibm.websphere.samples.daytrader.util.Log;
 
 /**
- * 
+ *
  * PingServlet2TwoPhase tests key functionality of a TwoPhase commit In this
  * primitive a servlet calls a Session EJB which begins a global txn The Session
  * EJB then reads a DB row and sends a message to JMS Queue The txn is closed w/
  * a 2-phase commit
- * 
+ *
  */
 @WebServlet(name = "ejb3.PingServlet2TwoPhase", urlPatterns = {"/ejb3/PingServlet2TwoPhase"})
 public class PingServlet2TwoPhase extends HttpServlet {
 
     private static final long serialVersionUID = -1563251786527079548L;
 
-	private static String initTime;
+    private static String initTime;
 
     private static int hitCount;
 

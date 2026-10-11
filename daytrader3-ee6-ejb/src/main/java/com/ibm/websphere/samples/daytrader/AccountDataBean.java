@@ -1,18 +1,18 @@
 /**
- *  Licensed to the Apache Software Foundation (ASF) under one or more
- *  contributor license agreements.  See the NOTICE file distributed with
- *  this work for additional information regarding copyright ownership.
- *  The ASF licenses this file to You under the Apache License, Version 2.0
- *  (the "License"); you may not use this file except in compliance with
- *  the License.  You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package com.ibm.websphere.samples.daytrader;
 
@@ -21,15 +21,16 @@ import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.Collection;
 import java.util.Date;
-import javax.ejb.EJBException;
 
-import javax.persistence.*;
+import jakarta.ejb.EJBException;
+
+import jakarta.persistence.*;
 
 import com.ibm.websphere.samples.daytrader.util.Log;
 
 @Entity(name = "accountejb")
 @Table(name = "accountejb")
-@NamedQueries( {
+@NamedQueries({
         @NamedQuery(name = "accountejb.findByCreationdate", query = "SELECT a FROM accountejb a WHERE a.creationDate = :creationdate"),
         @NamedQuery(name = "accountejb.findByOpenbalance", query = "SELECT a FROM accountejb a WHERE a.openBalance = :openbalance"),
         @NamedQuery(name = "accountejb.findByLogoutcount", query = "SELECT a FROM accountejb a WHERE a.logoutCount = :logoutcount"),
@@ -39,52 +40,52 @@ import com.ibm.websphere.samples.daytrader.util.Log;
         @NamedQuery(name = "accountejb.findByAccountid_eagerholdings", query = "SELECT a FROM accountejb a LEFT JOIN FETCH a.holdings WHERE a.accountID = :accountid"),
         @NamedQuery(name = "accountejb.findByLastlogin", query = "SELECT a FROM accountejb a WHERE a.lastLogin = :lastlogin"),
         @NamedQuery(name = "accountejb.findByLogincount", query = "SELECT a FROM accountejb a WHERE a.loginCount = :logincount")
-    })
+})
 public class AccountDataBean implements Serializable {
 
     private static final long serialVersionUID = 8437841265136840545L;
 
-	/* Accessor methods for persistent fields */
+    /* Accessor methods for persistent fields */
     @TableGenerator(
-            name="accountIdGen",
-            table="KEYGENEJB",
-            pkColumnName="KEYNAME",
-            valueColumnName="KEYVAL",
-            pkColumnValue="account",
-            allocationSize=1000)
+            name = "accountIdGen",
+            table = "KEYGENEJB",
+            pkColumnName = "KEYNAME",
+            valueColumnName = "KEYVAL",
+            pkColumnValue = "account",
+            allocationSize = 1000)
     @Id
-    @GeneratedValue(strategy=GenerationType.TABLE, generator="accountIdGen")
+    @GeneratedValue(strategy = GenerationType.TABLE, generator = "accountIdGen")
     @Column(name = "ACCOUNTID", nullable = false)
     private Integer accountID;              /* accountID */
-    
+
     @Column(name = "LOGINCOUNT", nullable = false)
     private int loginCount;                 /* loginCount */
-    
+
     @Column(name = "LOGOUTCOUNT", nullable = false)
     private int logoutCount;                /* logoutCount */
-    
+
     @Column(name = "LASTLOGIN")
     @Temporal(TemporalType.TIMESTAMP)
     private Date lastLogin;                 /* lastLogin Date */
-    
+
     @Column(name = "CREATIONDATE")
     @Temporal(TemporalType.TIMESTAMP)
     private Date creationDate;              /* creationDate */
-    
+
     @Column(name = "BALANCE")
     private BigDecimal balance;             /* balance */
-    
+
     @Column(name = "OPENBALANCE")
     private BigDecimal openBalance;         /* open balance */
-    
-    @OneToMany(mappedBy = "account", fetch=FetchType.LAZY)
+
+    @OneToMany(mappedBy = "account", fetch = FetchType.LAZY)
     private Collection<OrderDataBean> orders;
-    
-    @OneToMany(mappedBy = "account", fetch=FetchType.LAZY)
+
+    @OneToMany(mappedBy = "account", fetch = FetchType.LAZY)
     private Collection<HoldingDataBean> holdings;
-    
-    @OneToOne(fetch=FetchType.LAZY)
-    @JoinColumn(name="PROFILE_USERID")
+
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "PROFILE_USERID")
     private AccountProfileDataBean profile;
 
 //    @Version
@@ -98,13 +99,13 @@ public class AccountDataBean implements Serializable {
     }
 
     public AccountDataBean(Integer accountID,
-            int loginCount,
-            int logoutCount,
-            Date lastLogin,
-            Date creationDate,
-            BigDecimal balance,
-            BigDecimal openBalance,
-            String profileID) {
+                           int loginCount,
+                           int logoutCount,
+                           Date lastLogin,
+                           Date creationDate,
+                           BigDecimal balance,
+                           BigDecimal openBalance,
+                           String profileID) {
         setAccountID(accountID);
         setLoginCount(loginCount);
         setLogoutCount(logoutCount);
@@ -116,12 +117,12 @@ public class AccountDataBean implements Serializable {
     }
 
     public AccountDataBean(int loginCount,
-            int logoutCount,
-            Date lastLogin,
-            Date creationDate,
-            BigDecimal balance,
-            BigDecimal openBalance,
-            String profileID) {
+                           int logoutCount,
+                           Date lastLogin,
+                           Date creationDate,
+                           BigDecimal balance,
+                           BigDecimal openBalance,
+                           String profileID) {
         setLoginCount(loginCount);
         setLogoutCount(logoutCount);
         setLastLogin(lastLogin);
@@ -248,7 +249,7 @@ public class AccountDataBean implements Serializable {
     public void setOrders(Collection<OrderDataBean> orders) {
         this.orders = orders;
     }
-    
+
     public Collection<HoldingDataBean> getHoldings() {
         return holdings;
     }
@@ -295,7 +296,7 @@ public class AccountDataBean implements Serializable {
         if (!(object instanceof AccountDataBean)) {
             return false;
         }
-        AccountDataBean other = (AccountDataBean)object;
+        AccountDataBean other = (AccountDataBean) object;
         if (this.accountID != other.accountID && (this.accountID == null || !this.accountID.equals(other.accountID))) return false;
         return true;
     }

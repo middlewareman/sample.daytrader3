@@ -1,18 +1,18 @@
 /**
- *  Licensed to the Apache Software Foundation (ASF) under one or more
- *  contributor license agreements.  See the NOTICE file distributed with
- *  this work for additional information regarding copyright ownership.
- *  The ASF licenses this file to You under the Apache License, Version 2.0
- *  (the "License"); you may not use this file except in compliance with
- *  the License.  You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package com.ibm.websphere.samples.daytrader;
 
@@ -20,56 +20,56 @@ import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Date;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 
 
 import com.ibm.websphere.samples.daytrader.util.Log;
 
 @Entity(name = "holdingejb")
 @Table(name = "holdingejb")
-@NamedQueries( {
+@NamedQueries({
         @NamedQuery(name = "holdingejb.findByPurchaseprice", query = "SELECT h FROM holdingejb h WHERE h.purchasePrice = :purchaseprice"),
         @NamedQuery(name = "holdingejb.findByHoldingid", query = "SELECT h FROM holdingejb h WHERE h.holdingID = :holdingid"),
         @NamedQuery(name = "holdingejb.findByQuantity", query = "SELECT h FROM holdingejb h WHERE h.quantity = :quantity"),
         @NamedQuery(name = "holdingejb.findByPurchasedate", query = "SELECT h FROM holdingejb h WHERE h.purchaseDate = :purchasedate"),
         @NamedQuery(name = "holdingejb.holdingsByUserID", query = "SELECT h FROM holdingejb h where h.account.profile.userID = :userID")
-    })
+})
 public class HoldingDataBean implements Serializable {
 
     /* persistent/relationship fields */
 
     private static final long serialVersionUID = -2338411656251935480L;
 
-	@TableGenerator(
-            name="holdingIdGen",
-            table="KEYGENEJB",
-            pkColumnName="KEYNAME",
-            valueColumnName="KEYVAL",
-            pkColumnValue="holding",
-            allocationSize=1000)
+    @TableGenerator(
+            name = "holdingIdGen",
+            table = "KEYGENEJB",
+            pkColumnName = "KEYNAME",
+            valueColumnName = "KEYVAL",
+            pkColumnValue = "holding",
+            allocationSize = 1000)
     @Id
-    @GeneratedValue(strategy=GenerationType.TABLE, generator="holdingIdGen")
+    @GeneratedValue(strategy = GenerationType.TABLE, generator = "holdingIdGen")
     @Column(name = "HOLDINGID", nullable = false)
     private Integer holdingID;              /* holdingID */
-    
+
     @Column(name = "QUANTITY", nullable = false)
     private double quantity;                /* quantity */
-    
+
     @Column(name = "PURCHASEPRICE")
     private BigDecimal purchasePrice;       /* purchasePrice */
-    
+
     @Column(name = "PURCHASEDATE")
     @Temporal(TemporalType.TIMESTAMP)
     private Date purchaseDate;              /* purchaseDate */
-    
+
     @Transient
     private String quoteID;                 /* Holding(*)  ---> Quote(1) */
-    
-    @ManyToOne(fetch=FetchType.LAZY)
-    @JoinColumn(name="ACCOUNT_ACCOUNTID")
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "ACCOUNT_ACCOUNTID")
     private AccountDataBean account;
-    
-    @ManyToOne(fetch=FetchType.EAGER)
+
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "QUOTE_SYMBOL")
     private QuoteDataBean quote;
 
@@ -80,10 +80,10 @@ public class HoldingDataBean implements Serializable {
     }
 
     public HoldingDataBean(Integer holdingID,
-            double quantity,
-            BigDecimal purchasePrice,
-            Date purchaseDate,
-            String quoteID) {
+                           double quantity,
+                           BigDecimal purchasePrice,
+                           Date purchaseDate,
+                           String quoteID) {
         setHoldingID(holdingID);
         setQuantity(quantity);
         setPurchasePrice(purchasePrice);
@@ -92,10 +92,10 @@ public class HoldingDataBean implements Serializable {
     }
 
     public HoldingDataBean(double quantity,
-            BigDecimal purchasePrice,
-            Date purchaseDate,
-            AccountDataBean account,
-            QuoteDataBean quote) {
+                           BigDecimal purchasePrice,
+                           Date purchaseDate,
+                           AccountDataBean account,
+                           QuoteDataBean quote) {
         setQuantity(quantity);
         setPurchasePrice(purchasePrice);
         setPurchaseDate(purchaseDate);
@@ -191,7 +191,7 @@ public class HoldingDataBean implements Serializable {
          return getQuoteID();
      }
      */
-    
+
     public QuoteDataBean getQuote() {
         return quote;
     }
@@ -199,7 +199,7 @@ public class HoldingDataBean implements Serializable {
     public void setQuote(QuoteDataBean quote) {
         this.quote = quote;
     }
-    
+
     @Override
     public int hashCode() {
         int hash = 0;

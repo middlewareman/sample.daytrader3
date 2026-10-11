@@ -22,10 +22,10 @@ def testPort = (findProperty('testHttpPort') ?: '19083').toString()
 def testHttpsPort = (findProperty('testHttpsPort') ?: '19443').toString()
 def testJmsPort = (findProperty('testJmsPort') ?: '17276').toString()
 def testJmsSslPort = (findProperty('testJmsSslPort') ?: '17286').toString()
-def javaHome = javaToolchains.launcherFor { languageVersion = JavaLanguageVersion.of(8) }.get().metadata.installationPath.asFile.absolutePath
+def javaHome = javaToolchains.launcherFor { languageVersion = JavaLanguageVersion.of(21) }.get().metadata.installationPath.asFile.absolutePath
 
 def runtime = {
-    file(earProject.hasProperty('libertyRoot') ? earProject.property('libertyRoot') : "${earProject.buildDir}/wlp")
+    file(earProject.hasProperty('daytraderLibertyHome') ? earProject.property('daytraderLibertyHome') : "${earProject.buildDir}/jakarta-runtime/wlp")
 }
 
 task prepareTestServer(dependsOn: [':daytrader3-ee6:ear', ':daytrader3-ee6:installDayTraderFeatures']) {

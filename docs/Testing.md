@@ -1,5 +1,11 @@
 # Gradle verification on the restored platform
 
+The current Jakarta experiment branch follows [the target build guide](Jakarta-EE11.md).
+Its frozen suite has 52 cases, including three pre-migration JSF/REST checks.
+Application units/server use Java 21; the independent verification module retains
+Java 8. The target uses Open Liberty 26.0.0.9 / EclipseLink with shared caching
+disabled. Historical baseline observations below refer to the repaired Java EE 6 stack.
+
 Use the checked-in Gradle 8.14.3 wrapper with Java 8:
 
 ```bash

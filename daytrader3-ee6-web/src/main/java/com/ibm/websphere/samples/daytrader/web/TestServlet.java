@@ -1,24 +1,24 @@
 /**
- *  Licensed to the Apache Software Foundation (ASF) under one or more
- *  contributor license agreements.  See the NOTICE file distributed with
- *  this work for additional information regarding copyright ownership.
- *  The ASF licenses this file to You under the Apache License, Version 2.0
- *  (the "License"); you may not use this file except in compliance with
- *  the License.  You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package com.ibm.websphere.samples.daytrader.web;
 
-import javax.servlet.*;
-import javax.servlet.http.*;
-import javax.servlet.annotation.WebServlet;
+import jakarta.servlet.*;
+import jakarta.servlet.http.*;
+import jakarta.servlet.annotation.WebServlet;
 
 
 import java.io.IOException;
@@ -31,54 +31,49 @@ import com.ibm.websphere.samples.daytrader.util.*;
 public class TestServlet extends HttpServlet {
 
 
-	private static final long serialVersionUID = -2927579146688173127L;
+    private static final long serialVersionUID = -2927579146688173127L;
 
-	public void init(ServletConfig config) throws ServletException
-	{
-		super.init(config);
-	}
-	
-	
-   /**
-	* Process incoming HTTP GET requests
-	*
-	* @param request Object that encapsulates the request to the servlet
-	* @param response Object that encapsulates the response from the servlet
-	*/
-	public void doGet(HttpServletRequest request, HttpServletResponse response)
-		throws ServletException, IOException
-	{
-		performTask(request,response);
-	}
+    public void init(ServletConfig config) throws ServletException {
+        super.init(config);
+    }
 
-   /**
-	* Process incoming HTTP POST requests
-	*
-	* @param request Object that encapsulates the request to the servlet
-	* @param response Object that encapsulates the response from the servlet
-	*/
-	public void doPost(HttpServletRequest request, HttpServletResponse response)
-		throws ServletException, IOException
-	{
-		performTask(request,response);
-	}	
 
-   /**
-	* Main service method for TradeAppServlet
-	*
-	* @param request Object that encapsulates the request to the servlet
-	* @param response Object that encapsulates the response from the servlet
-	*/    	
-	public void performTask(HttpServletRequest req, HttpServletResponse resp)
-		throws ServletException, IOException 
-	{
-		try {
-			Log.debug("Enter TestServlet doGet");
-			TradeConfig.runTimeMode = TradeConfig.DIRECT;
-			for (int i=0; i<10; i++) 
-			{
-				new TradeAction().createQuote("s:"+i, "Company " + i, new BigDecimal(i*1.1));
-			}
+    /**
+     * Process incoming HTTP GET requests
+     *
+     * @param request  Object that encapsulates the request to the servlet
+     * @param response Object that encapsulates the response from the servlet
+     */
+    public void doGet(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        performTask(request, response);
+    }
+
+    /**
+     * Process incoming HTTP POST requests
+     *
+     * @param request  Object that encapsulates the request to the servlet
+     * @param response Object that encapsulates the response from the servlet
+     */
+    public void doPost(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        performTask(request, response);
+    }
+
+    /**
+     * Main service method for TradeAppServlet
+     *
+     * @param request  Object that encapsulates the request to the servlet
+     * @param response Object that encapsulates the response from the servlet
+     */
+    public void performTask(HttpServletRequest req, HttpServletResponse resp)
+            throws ServletException, IOException {
+        try {
+            Log.debug("Enter TestServlet doGet");
+            TradeConfig.runTimeMode = TradeConfig.DIRECT;
+            for (int i = 0; i < 10; i++) {
+                new TradeAction().createQuote("s:" + i, "Company " + i, new BigDecimal(i * 1.1));
+            }
 			/*
 			
 			AccountDataBean accountData = new TradeAction().register("user1", "password", "fullname", "address", 
@@ -101,11 +96,8 @@ public class TestServlet extends HttpServlet {
 			getServletContext().getRequestDispatcher("/tradehome.jsp").include(req, resp);
 			out.write("<BR><BR>done.</BODY>");
 			*/
-		}
-		catch (Exception e)
-		{
-			Log.error("TestServletException", e);
-		}
-	}
+        } catch (Exception e) {
+            Log.error("TestServletException", e);
+        }
+    }
 }
-

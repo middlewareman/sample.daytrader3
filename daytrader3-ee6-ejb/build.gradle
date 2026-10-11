@@ -1,42 +1,12 @@
-import org.gradle.api.attributes.java.TargetJvmVersion
-
 apply plugin: 'java'
 apply plugin: 'eclipse-wtp'
-
-jar {
-    archiveBaseName = 'dt-ejb'
-}
-
-
-// Dependencies
-repositories { mavenCentral(); }
-
-dependencies {
-    implementation group: 'org.hibernate.javax.persistence', name: 'hibernate-jpa-2.0-api', version: '1.0.1.Final'
-    implementation group: 'javax.ejb', name: 'ejb-api', version: '3.0'
-    implementation group: 'javax.jms', name: 'jms-api', version: '1.1-rev-1'
-    implementation group: 'javax.transaction', name: 'jta', version: '1.1'
-}
-
-java {
-    sourceCompatibility = JavaVersion.VERSION_1_7
-    targetCompatibility = JavaVersion.VERSION_1_7
-}
-
-// The application retains Java 7 bytecode; the independent JUnit 5 runner needs Java 8.
-compileTestJava {
-    sourceCompatibility = '1.8'
-    targetCompatibility = '1.8'
-}
-['testCompileClasspath', 'testRuntimeClasspath'].each { name ->
-    configurations.named(name) {
-        attributes.attribute(TargetJvmVersion.TARGET_JVM_VERSION_ATTRIBUTE, 8)
-    }
-}
-
 apply plugin: 'jacoco'
+jar { archiveBaseName = 'dt-ejb' }
+repositories { mavenCentral() }
 jacoco { toolVersion = '0.8.12' }
 dependencies {
+    compileOnly 'jakarta.platform:jakarta.jakartaee-api:11.0.0'
+    testImplementation 'jakarta.platform:jakarta.jakartaee-api:11.0.0'
     testImplementation 'org.junit.jupiter:junit-jupiter:5.10.3'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher:1.10.3'
 }

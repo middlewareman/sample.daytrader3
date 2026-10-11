@@ -1,47 +1,48 @@
 /**
- *  Licensed to the Apache Software Foundation (ASF) under one or more
- *  contributor license agreements.  See the NOTICE file distributed with
- *  this work for additional information regarding copyright ownership.
- *  The ASF licenses this file to You under the Apache License, Version 2.0
- *  (the "License"); you may not use this file except in compliance with
- *  the License.  You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package com.ibm.websphere.samples.daytrader.web.prims.ejb3;
 
 import java.io.*;
-import javax.servlet.*;
-import javax.servlet.http.*;
+
+import jakarta.servlet.*;
+import jakarta.servlet.http.*;
 
 
 import com.ibm.websphere.samples.daytrader.QuoteDataBean;
 import com.ibm.websphere.samples.daytrader.TradeConfig;
 import com.ibm.websphere.samples.daytrader.util.Log;
 
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 
 /**
- * 
+ *
  * Primitive designed to run within the TradeApplication and makes use of
  * {@link trade_client.TradeConfig} for config parameters and random stock
  * symbols. Servlet will generate a random stock symbol and get the price of
  * that symbol using a {@link trade.Quote} Entity EJB This tests the common path
  * of a Servlet calling an Entity EJB to get data
- * 
+ *
  */
 
 public class PingServlet2Entity extends HttpServlet {
     private static final long serialVersionUID = -9004026114063894842L;
 
-	private static String initTime;
+    private static String initTime;
 
     private static int hitCount;
 

@@ -1,29 +1,29 @@
 /**
- *  Licensed to the Apache Software Foundation (ASF) under one or more
- *  contributor license agreements.  See the NOTICE file distributed with
- *  this work for additional information regarding copyright ownership.
- *  The ASF licenses this file to You under the Apache License, Version 2.0
- *  (the "License"); you may not use this file except in compliance with
- *  the License.  You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package com.ibm.websphere.samples.daytrader.web;
 
 import java.io.IOException;
 
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletException;
-import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.ServletConfig;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 import com.ibm.websphere.samples.daytrader.RunStatsDataBean;
 import com.ibm.websphere.samples.daytrader.TradeAction;
@@ -35,9 +35,9 @@ import com.ibm.websphere.samples.daytrader.util.Log;
  * TradeConfigServlet provides a servlet interface to adjust DayTrader runtime parameters.
  * TradeConfigServlet updates values in the {@link com.ibm.websphere.samples.daytrader.web.TradeConfig} JavaBean holding
  * all configuration and runtime parameters for the Trade application
- * 
+ *
  */
-@WebServlet(name = "TradeConfigServlet", urlPatterns = { "/config" })
+@WebServlet(name = "TradeConfigServlet", urlPatterns = {"/config"})
 public class TradeConfigServlet extends HttpServlet {
 
     private static final long serialVersionUID = -1910381529792500095L;
@@ -46,8 +46,7 @@ public class TradeConfigServlet extends HttpServlet {
      * Servlet initialization method.
      */
     @Override
-    public void init(ServletConfig config) throws ServletException
-    {
+    public void init(ServletConfig config) throws ServletException {
         super.init(config);
     }
 
@@ -57,31 +56,29 @@ public class TradeConfigServlet extends HttpServlet {
      * Creation date: (2/8/2000 3:43:59 PM)
      */
     void doConfigDisplay(
-                         HttpServletRequest req,
-                         HttpServletResponse resp,
-                         String results)
-                    throws Exception {
+            HttpServletRequest req,
+            HttpServletResponse resp,
+            String results)
+            throws Exception {
 
         TradeConfig currentConfig = new TradeConfig();
 
         req.setAttribute("tradeConfig", currentConfig);
         req.setAttribute("status", results);
         getServletConfig()
-                        .getServletContext()
-                        .getRequestDispatcher(TradeConfig.getPage(TradeConfig.CONFIG_PAGE))
-                        .include(req, resp);
+                .getServletContext()
+                .getRequestDispatcher(TradeConfig.getPage(TradeConfig.CONFIG_PAGE))
+                .include(req, resp);
     }
 
     void doResetTrade(
-                      HttpServletRequest req,
-                      HttpServletResponse resp,
-                      String results)
-                    throws Exception
-    {
+            HttpServletRequest req,
+            HttpServletResponse resp,
+            String results)
+            throws Exception {
         RunStatsDataBean runStatsData = new RunStatsDataBean();
         TradeConfig currentConfig = new TradeConfig();
-        try
-        {
+        try {
             runStatsData = new TradeAction().resetTrade(false);
 
             req.setAttribute("runStatsData", runStatsData);
@@ -89,16 +86,15 @@ public class TradeConfigServlet extends HttpServlet {
             results += "Trade Reset completed successfully";
             req.setAttribute("status", results);
 
-        } catch (Exception e)
-        {
+        } catch (Exception e) {
             results += "Trade Reset Error  - see log for details";
             Log.error(e, results);
             throw e;
         }
         getServletConfig()
-                        .getServletContext()
-                        .getRequestDispatcher(TradeConfig.getPage(TradeConfig.STATS_PAGE))
-                        .include(req, resp);
+                .getServletContext()
+                .getRequestDispatcher(TradeConfig.getPage(TradeConfig.STATS_PAGE))
+                .include(req, resp);
 
     }
 
@@ -107,146 +103,125 @@ public class TradeConfigServlet extends HttpServlet {
      * Creation date: (2/8/2000 3:44:24 PM)
      */
     void doConfigUpdate(HttpServletRequest req, HttpServletResponse resp)
-                    throws Exception {
+            throws Exception {
 
         TradeConfig currentConfig = new TradeConfig();
 
         String currentConfigStr = "\n\n########## Trade configuration update. Current config:\n\n";
         String runTimeModeStr = req.getParameter("RunTimeMode");
-        if (runTimeModeStr != null)
-        {
-            try
-            {
+        if (runTimeModeStr != null) {
+            try {
                 int i = Integer.parseInt(runTimeModeStr);
                 if ((i >= 0)
-                    && (i < TradeConfig.runTimeModeNames.length)) //Input validation
+                        && (i < TradeConfig.runTimeModeNames.length)) //Input validation
                     TradeConfig.runTimeMode = i;
-            } catch (Exception e)
-            {
+            } catch (Exception e) {
                 //>>rjm
                 Log.error(
-                          e,
-                          "TradeConfigServlet.doConfigUpdate(..): minor exception caught",
-                          "trying to set runtimemode to " + runTimeModeStr,
-                          "reverting to current value");
+                        e,
+                        "TradeConfigServlet.doConfigUpdate(..): minor exception caught",
+                        "trying to set runtimemode to " + runTimeModeStr,
+                        "reverting to current value");
 
             } // If the value is bad, simply revert to current
         }
         currentConfigStr += "\t\tRunTimeMode:\t\t" + TradeConfig.runTimeModeNames[TradeConfig.runTimeMode] + "\n";
 
         String orderProcessingModeStr = req.getParameter("OrderProcessingMode");
-        if (orderProcessingModeStr != null)
-        {
-            try
-            {
+        if (orderProcessingModeStr != null) {
+            try {
                 int i = Integer.parseInt(orderProcessingModeStr);
                 if ((i >= 0)
-                    && (i < TradeConfig.orderProcessingModeNames.length)) //Input validation
+                        && (i < TradeConfig.orderProcessingModeNames.length)) //Input validation
                     TradeConfig.orderProcessingMode = i;
-            } catch (Exception e)
-            {
+            } catch (Exception e) {
                 //>>rjm
                 Log.error(
-                          e,
-                          "TradeConfigServlet.doConfigUpdate(..): minor exception caught",
-                          "trying to set orderProcessing to " + orderProcessingModeStr,
-                          "reverting to current value");
+                        e,
+                        "TradeConfigServlet.doConfigUpdate(..): minor exception caught",
+                        "trying to set orderProcessing to " + orderProcessingModeStr,
+                        "reverting to current value");
 
             } // If the value is bad, simply revert to current
         }
         currentConfigStr += "\t\tOrderProcessingMode:\t" + TradeConfig.orderProcessingModeNames[TradeConfig.orderProcessingMode] + "\n";
 
         String workloadMixStr = req.getParameter("WorkloadMix");
-        if (workloadMixStr != null)
-        {
-            try
-            {
+        if (workloadMixStr != null) {
+            try {
                 int i = Integer.parseInt(workloadMixStr);
                 if ((i >= 0)
-                    && (i < TradeConfig.workloadMixNames.length)) //Input validation
+                        && (i < TradeConfig.workloadMixNames.length)) //Input validation
                     TradeConfig.workloadMix = i;
-            } catch (Exception e)
-            {
+            } catch (Exception e) {
                 Log.error(
-                          e,
-                          "TradeConfigServlet.doConfigUpdate(..): minor exception caught",
-                          "trying to set workloadMix to " + workloadMixStr,
-                          "reverting to current value");
+                        e,
+                        "TradeConfigServlet.doConfigUpdate(..): minor exception caught",
+                        "trying to set workloadMix to " + workloadMixStr,
+                        "reverting to current value");
             } // If the value is bad, simply revert to current
         }
         currentConfigStr += "\t\tWorkload Mix:\t\t" + TradeConfig.workloadMixNames[TradeConfig.workloadMix] + "\n";
 
         String webInterfaceStr = req.getParameter("WebInterface");
-        if (webInterfaceStr != null)
-        {
-            try
-            {
+        if (webInterfaceStr != null) {
+            try {
                 int i = Integer.parseInt(webInterfaceStr);
                 if ((i >= 0)
-                    && (i < TradeConfig.webInterfaceNames.length)) //Input validation
+                        && (i < TradeConfig.webInterfaceNames.length)) //Input validation
                     TradeConfig.webInterface = i;
-            } catch (Exception e)
-            {
+            } catch (Exception e) {
                 Log.error(
-                          e,
-                          "TradeConfigServlet.doConfigUpdate(..): minor exception caught",
-                          "trying to set WebInterface to " + webInterfaceStr,
-                          "reverting to current value");
+                        e,
+                        "TradeConfigServlet.doConfigUpdate(..): minor exception caught",
+                        "trying to set WebInterface to " + webInterfaceStr,
+                        "reverting to current value");
 
             } // If the value is bad, simply revert to current
         }
         currentConfigStr += "\t\tWeb Interface:\t\t" + TradeConfig.webInterfaceNames[TradeConfig.webInterface] + "\n";
 
         String cachingTypeStr = req.getParameter("CachingType");
-        if (cachingTypeStr != null)
-        {
-            try
-            {
+        if (cachingTypeStr != null) {
+            try {
                 int i = Integer.parseInt(cachingTypeStr);
                 if ((i >= 0)
-                    && (i < TradeConfig.cachingTypeNames.length)) //Input validation
+                        && (i < TradeConfig.cachingTypeNames.length)) //Input validation
                     TradeConfig.cachingType = i;
-            } catch (Exception e)
-            {
+            } catch (Exception e) {
                 Log.error(
-                          e,
-                          "TradeConfigServlet.doConfigUpdate(..): minor exception caught",
-                          "trying to set CachingType to " + cachingTypeStr,
-                          "reverting to current value");
+                        e,
+                        "TradeConfigServlet.doConfigUpdate(..): minor exception caught",
+                        "trying to set CachingType to " + cachingTypeStr,
+                        "reverting to current value");
             } // If the value is bad, simply revert to current
         }
         currentConfigStr += "\t\tCachingType:\t\t" + TradeConfig.cachingTypeNames[TradeConfig.cachingType] + "\n";
 
         String parm = req.getParameter("MaxUsers");
-        if ((parm != null) && (parm.length() > 0))
-        {
-            try
-            {
+        if ((parm != null) && (parm.length() > 0)) {
+            try {
                 TradeConfig.setMAX_USERS(Integer.parseInt(parm));
-            } catch (Exception e)
-            {
+            } catch (Exception e) {
                 Log.error(
-                          e,
-                          "TradeConfigServlet.doConfigUpdate(..): minor exception caught",
-                          "Setting maxusers, probably error parsing string to int:" + parm,
-                          "revertying to current value: " + TradeConfig.getMAX_USERS());
+                        e,
+                        "TradeConfigServlet.doConfigUpdate(..): minor exception caught",
+                        "Setting maxusers, probably error parsing string to int:" + parm,
+                        "revertying to current value: " + TradeConfig.getMAX_USERS());
 
             } //On error, revert to saved
         }
         parm = req.getParameter("MaxQuotes");
-        if ((parm != null) && (parm.length() > 0))
-        {
-            try
-            {
+        if ((parm != null) && (parm.length() > 0)) {
+            try {
                 TradeConfig.setMAX_QUOTES(Integer.parseInt(parm));
-            } catch (Exception e)
-            {
+            } catch (Exception e) {
                 //>>rjm
                 Log.error(
-                          e,
-                          "TradeConfigServlet: minor exception caught",
-                          "trying to set max_quotes, error on parsing int " + parm,
-                          "reverting to current value " + TradeConfig.getMAX_QUOTES());
+                        e,
+                        "TradeConfigServlet: minor exception caught",
+                        "trying to set max_quotes, error on parsing int " + parm,
+                        "reverting to current value " + TradeConfig.getMAX_QUOTES());
                 //<<rjm
 
             } //On error, revert to saved
@@ -260,10 +235,10 @@ public class TradeConfigServlet extends HttpServlet {
                 TradeConfig.setMarketSummaryInterval(Integer.parseInt(parm));
             } catch (Exception e) {
                 Log.error(
-                          e,
-                          "TradeConfigServlet: minor exception caught",
-                          "trying to set marketSummaryInterval, error on parsing int " + parm,
-                          "reverting to current value " + TradeConfig.getMarketSummaryInterval());
+                        e,
+                        "TradeConfigServlet: minor exception caught",
+                        "trying to set marketSummaryInterval, error on parsing int " + parm,
+                        "reverting to current value " + TradeConfig.getMarketSummaryInterval());
 
             }
         }
@@ -275,10 +250,10 @@ public class TradeConfigServlet extends HttpServlet {
                 TradeConfig.setPrimIterations(Integer.parseInt(parm));
             } catch (Exception e) {
                 Log.error(
-                          e,
-                          "TradeConfigServlet: minor exception caught",
-                          "trying to set primIterations, error on parsing int " + parm,
-                          "reverting to current value " + TradeConfig.getPrimIterations());
+                        e,
+                        "TradeConfigServlet: minor exception caught",
+                        "trying to set primIterations, error on parsing int " + parm,
+                        "reverting to current value " + TradeConfig.getPrimIterations());
 
             }
         }
@@ -317,38 +292,28 @@ public class TradeConfigServlet extends HttpServlet {
 
     @Override
     public void service(HttpServletRequest req, HttpServletResponse resp)
-                    throws ServletException, IOException {
+            throws ServletException, IOException {
 
         String action = null;
         String result = "";
 
         resp.setContentType("text/html");
-        try
-        {
+        try {
             action = req.getParameter("action");
-            if (action == null)
-            {
+            if (action == null) {
                 doConfigDisplay(req, resp, result + "<b><br>Current DayTrader Configuration:</br></b>");
                 return;
-            }
-            else if (action.equals("updateConfig"))
-            {
+            } else if (action.equals("updateConfig")) {
                 doConfigUpdate(req, resp);
                 result = "<B><BR>DayTrader Configuration Updated</BR></B>";
-            }
-            else if (action.equals("resetTrade"))
-            {
+            } else if (action.equals("resetTrade")) {
                 doResetTrade(req, resp, "");
                 return;
-            }
-            else if (action.equals("buildDB"))
-            {
+            } else if (action.equals("buildDB")) {
                 resp.setContentType("text/html");
                 new TradeBuildDB(resp.getWriter(), null);
                 result = "DayTrader Database Built - " + TradeConfig.getMAX_USERS() + "users created";
-            }
-            else if (action.equals("buildDBTables"))
-            {
+            } else if (action.equals("buildDBTables")) {
 
                 resp.setContentType("text/html");
 
@@ -356,37 +321,30 @@ public class TradeConfigServlet extends HttpServlet {
                 TradeDirect tradeDirect = new TradeDirect();
 
                 String dbProductName = null;
-                try
-                {
+                try {
                     dbProductName = tradeDirect.checkDBProductName();
-                } catch (Exception e)
-                {
+                } catch (Exception e) {
                     Log.error(e, "TradeBuildDB: Unable to check DB Product name");
                 }
-                if (dbProductName == null)
-                {
+                if (dbProductName == null) {
                     resp.getWriter().println("<BR>TradeBuildDB: **** Unable to check DB Product name, please check Database/AppServer configuration and retry ****</BR></BODY>");
                     return;
                 }
 
                 String ddlFile = null;
                 //Locate DDL file for the specified database
-                try
-                {
+                try {
                     resp.getWriter().println("<BR>TradeBuildDB: **** Database Product detected: " + dbProductName + " ****</BR>");
                     if (dbProductName.startsWith("DB2/")) // if db is DB2
                     {
                         ddlFile = "/dbscripts/db2/Table.ddl";
-                    }
-                    else if (dbProductName.startsWith("Apache Derby")) //if db is Derby
+                    } else if (dbProductName.startsWith("Apache Derby")) //if db is Derby
                     {
                         ddlFile = "/dbscripts/derby/Table.ddl";
-                    }
-                    else if (dbProductName.startsWith("Oracle")) // if the Db is Oracle
+                    } else if (dbProductName.startsWith("Oracle")) // if the Db is Oracle
                     {
                         ddlFile = "/dbscripts/oracle/Table.ddl";
-                    }
-                    else // Unsupported "Other" Database
+                    } else // Unsupported "Other" Database
                     {
                         ddlFile = "/dbscripts/other/Table.ddl";
                         resp.getWriter().println("<BR>TradeBuildDB: **** This Database is unsupported/untested use at your own risk ****</BR>");
@@ -394,8 +352,7 @@ public class TradeConfigServlet extends HttpServlet {
 
                     resp.getWriter().println("<BR>TradeBuildDB: **** The DDL file at path <I>" + ddlFile + "</I> will be used ****</BR>");
                     resp.getWriter().flush();
-                } catch (Exception e)
-                {
+                } catch (Exception e) {
                     Log.error(e, "TradeBuildDB: Unable to locate DDL file for the specified database");
                     resp.getWriter().println("<BR>TradeBuildDB: **** Unable to locate DDL file for the specified database ****</BR></BODY>");
                     return;
@@ -404,19 +361,18 @@ public class TradeConfigServlet extends HttpServlet {
 
             }
             doConfigDisplay(req, resp, result + "Current DayTrader Configuration:");
-        } catch (Exception e)
-        {
+        } catch (Exception e) {
             Log.error(
-                      e,
-                      "TradeConfigServlet.service(...)",
-                      "Exception trying to perform action=" + action);
+                    e,
+                    "TradeConfigServlet.service(...)",
+                    "Exception trying to perform action=" + action);
 
             resp.sendError(
-                           500,
-                           "TradeConfigServlet.service(...)"
-                                           + "Exception trying to perform action="
-                                           + action
-                                           + "\nException details: " + e.toString());
+                    500,
+                    "TradeConfigServlet.service(...)"
+                            + "Exception trying to perform action="
+                            + action
+                            + "\nException details: " + e.toString());
 
         }
     }

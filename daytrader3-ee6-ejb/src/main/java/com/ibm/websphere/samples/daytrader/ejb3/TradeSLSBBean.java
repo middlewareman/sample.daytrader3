@@ -23,28 +23,28 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.Resource;
-import javax.ejb.EJBException;
-import javax.ejb.SessionContext;
-import javax.ejb.Stateless;
-import javax.ejb.TransactionAttribute;
-import javax.ejb.TransactionAttributeType;
-import javax.ejb.TransactionManagement;
-import javax.ejb.TransactionManagementType;
-import javax.jms.Connection;
-import javax.jms.MessageProducer;
-import javax.jms.Queue;
-import javax.jms.QueueConnectionFactory;
-import javax.jms.Session;
-import javax.jms.TextMessage;
-import javax.jms.Topic;
-import javax.jms.TopicConnectionFactory;
-import javax.persistence.EntityManager;
-import javax.persistence.LockModeType;
-import javax.persistence.PersistenceContext;
-import javax.persistence.Query;
-import javax.transaction.RollbackException;
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.Resource;
+import jakarta.ejb.EJBException;
+import jakarta.ejb.SessionContext;
+import jakarta.ejb.Stateless;
+import jakarta.ejb.TransactionAttribute;
+import jakarta.ejb.TransactionAttributeType;
+import jakarta.ejb.TransactionManagement;
+import jakarta.ejb.TransactionManagementType;
+import jakarta.jms.Connection;
+import jakarta.jms.MessageProducer;
+import jakarta.jms.Queue;
+import jakarta.jms.QueueConnectionFactory;
+import jakarta.jms.Session;
+import jakarta.jms.TextMessage;
+import jakarta.jms.Topic;
+import jakarta.jms.TopicConnectionFactory;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.LockModeType;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.Query;
+import jakarta.transaction.RollbackException;
 
 import com.ibm.websphere.samples.daytrader.AccountDataBean;
 import com.ibm.websphere.samples.daytrader.AccountProfileDataBean;
@@ -63,10 +63,10 @@ import com.ibm.websphere.samples.daytrader.util.Log;
 @TransactionManagement(TransactionManagementType.CONTAINER)
 public class TradeSLSBBean implements TradeSLSBLocal {
 
-    @Resource(name = "jms/QueueConnectionFactory", authenticationType = javax.annotation.Resource.AuthenticationType.APPLICATION)
+    @Resource(name = "jms/QueueConnectionFactory", authenticationType = jakarta.annotation.Resource.AuthenticationType.APPLICATION)
     private QueueConnectionFactory queueConnectionFactory;
 
-    @Resource(name = "jms/TopicConnectionFactory", authenticationType = javax.annotation.Resource.AuthenticationType.APPLICATION)
+    @Resource(name = "jms/TopicConnectionFactory", authenticationType = jakarta.annotation.Resource.AuthenticationType.APPLICATION)
     private TopicConnectionFactory topicConnectionFactory;
 
     @Resource(name = "jms/TradeStreamerTopic")
@@ -87,7 +87,9 @@ public class TradeSLSBBean implements TradeSLSBLocal {
         entityManager.refresh(account, LockModeType.PESSIMISTIC_WRITE);
     }
 
-    /** Creates a new instance of TradeSLSBBean */
+    /**
+     * Creates a new instance of TradeSLSBBean
+     */
     public TradeSLSBBean() {
 
         if (Log.doTrace())
@@ -254,7 +256,7 @@ public class TradeSLSBBean implements TradeSLSBLocal {
             if (Log.doTrace())
                 Log.trace("TradeSLSBBean:queueOrder Sending message: " + message.getText());
             msgProducer.send(message);
-        } catch (javax.jms.JMSException e) {
+        } catch (jakarta.jms.JMSException e) {
             throw new EJBException(e.getMessage(), e); // pass the exception back
         } finally {
             try {
@@ -262,7 +264,7 @@ public class TradeSLSBBean implements TradeSLSBLocal {
                     conn.close();
                 if (sess != null)
                     sess.close();
-            } catch (javax.jms.JMSException e) {
+            } catch (jakarta.jms.JMSException e) {
                 throw new EJBException(e.getMessage(), e); // pass the exception back
             }
         }
@@ -665,7 +667,7 @@ public class TradeSLSBBean implements TradeSLSBLocal {
                     conn.close();
                 if (sess != null)
                     sess.close();
-            } catch (javax.jms.JMSException e) {
+            } catch (jakarta.jms.JMSException e) {
                 throw new EJBException(e.getMessage(), e); // pass the exception back
             }
         }

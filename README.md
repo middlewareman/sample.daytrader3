@@ -1,8 +1,8 @@
 # sample.daytrader3 [![Build Status](https://travis-ci.org/WASdev/sample.daytrader3.svg?branch=master)](https://travis-ci.org/WASdev/sample.daytrader3)
 
-# Java EE6: DayTrader3 Sample
+# DayTrader 3 — Java 21 / Jakarta EE 11 experiment
 
-Java EE6 DayTrader3 Sample
+Migrated from the Java EE 6 DayTrader 3 sample, retaining the enterprise EAR architecture.
 
 
 This sample contains the DayTrader 3 benchmark, which is an application built around the paradigm of an online stock trading system. The application allows users to login, view their portfolio, lookup stock quotes, and buy or sell stock shares. With the aid of a Web-based load driver such as Apache JMeter, the real-world workload provided by DayTrader can be used to measure and compare the performance of Java Platform, Enterprise Edition (Java EE) application servers offered by a variety of vendors. In addition to the full workload, the application also contains a set of primitives used for functional and performance testing of various Java EE components and common design patterns.
@@ -11,13 +11,15 @@ DayTrader is an end-to-end benchmark and performance sample application. It prov
 
 ## Getting Started
 
-This fork uses the checked-in Gradle wrapper with Java 8 as its sole build.
+This branch uses the checked-in Gradle wrapper with Java 21 application toolchains.
+The independent verification client/fixture module retains Java 8.
+See [the Jakarta EE 11 build and compatibility guide](docs/Jakarta-EE11.md).
 Maven build support was removed before adding the characterization tests.
 
 Browse the code to see what it does, or build and run it yourself:
 * [Building and running on the command line using Gradle](/docs/Using-cmd-line.md)
 * [Gradle tests, isolated fixtures, and application coverage](docs/Testing.md)
-* [Gradle wrapper and IntelliJ IDEA baseline](docs/Using-IDEA.md)
+* [Gradle wrapper and IntelliJ IDEA](docs/Using-IDEA.md)
 * [Restored Gradle runtime and local database setup](docs/Restored-runtime.md)
 * [Building and running using Eclipse and WebSphere Development Tools (WDT)](/docs/Using-WDT.md)
 * [Downloading WAS Liberty](/docs/Downloading-WAS-Liberty.md)

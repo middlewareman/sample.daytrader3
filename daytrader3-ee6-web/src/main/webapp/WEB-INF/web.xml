@@ -16,108 +16,111 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 -->
-<web-app xmlns="http://java.sun.com/xml/ns/javaee" version="3.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd">
+<web-app xmlns="https://jakarta.ee/xml/ns/jakartaee" version="6.1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="https://jakarta.ee/xml/ns/jakartaee https://jakarta.ee/xml/ns/jakartaee/web-app_6_1.xsd">
 
     <display-name>DayTrader Web</display-name>
-    
+
     <context-param>
-  		<param-name>javax.faces.PROJECT_STAGE</param-name>
-  		<param-value>Production</param-value>
-	</context-param>
-    <context-param>
-    	<description>
-    	The location where state information is saved.
-Valid values are 'server' (typically saved in HttpSession) and 'client' (typically
-saved as a hidden field in the form.
-Default is server.</description>
-    	<param-name>javax.faces.STATE_SAVING_METHOD</param-name>
-    	<param-value>server</param-value>
+        <param-name>jakarta.faces.PROJECT_STAGE</param-name>
+        <param-value>Production</param-value>
     </context-param>
     <context-param>
-    	<description>
-    	The default suffix for extension-mapped resources that contain JSF components.
-Default is '.jsp'.</description>
-    	<param-name>javax.faces.DEFAULT_SUFFIX</param-name>
-    	<param-value>.xhtml</param-value>
+        <description>
+            The location where state information is saved.
+            Valid values are 'server' (typically saved in HttpSession) and 'client' (typically
+            saved as a hidden field in the form.
+            Default is server.
+        </description>
+        <param-name>jakarta.faces.STATE_SAVING_METHOD</param-name>
+        <param-value>server</param-value>
     </context-param>
     <context-param>
-    	<description>
-    	Monitors Faces JSP files for modifications and synchronizes a running server with
-the changes without restarting the server. If this parameter is set to false or
-removed from the deployment descriptor, any changes made to Faces JSP files may
-not be seen by the server until it is restarted. This parameter is usually set
-to true while the Faces JSP files are being developed and debugged in order to
-improve the performance of the development environment.</description>
-    	<param-name>com.ibm.ws.jsf.JSP_UPDATE_CHECK</param-name>
-    	<param-value>false</param-value>
+        <description>
+            The default suffix for extension-mapped resources that contain JSF components.
+            Default is '.jsp'.
+        </description>
+        <param-name>jakarta.faces.DEFAULT_SUFFIX</param-name>
+        <param-value>.xhtml</param-value>
     </context-param>
     <context-param>
-    	<description>
-    	Load JSF runtime when the application server starts up. If this parameter is set to false or removed,
-JSF runtime will be loaded and initialized when the first JSF request is processed.
-This may disable custom JSF extensions, such as factories defined in the project.</description>
-    	<param-name>com.ibm.ws.jsf.LOAD_FACES_CONFIG_AT_STARTUP</param-name>
-    	<param-value>true</param-value>
+        <description>
+            Monitors Faces JSP files for modifications and synchronizes a running server with
+            the changes without restarting the server. If this parameter is set to false or
+            removed from the deployment descriptor, any changes made to Faces JSP files may
+            not be seen by the server until it is restarted. This parameter is usually set
+            to true while the Faces JSP files are being developed and debugged in order to
+            improve the performance of the development environment.
+        </description>
+        <param-name>com.ibm.ws.jsf.JSP_UPDATE_CHECK</param-name>
+        <param-value>false</param-value>
     </context-param>
-    
+    <context-param>
+        <description>
+            Load JSF runtime when the application server starts up. If this parameter is set to false or removed,
+            JSF runtime will be loaded and initialized when the first JSF request is processed.
+            This may disable custom JSF extensions, such as factories defined in the project.
+        </description>
+        <param-name>com.ibm.ws.jsf.LOAD_FACES_CONFIG_AT_STARTUP</param-name>
+        <param-value>true</param-value>
+    </context-param>
+
     <!-- MyFaces Performance Tuning params -->
-	<context-param>
+    <context-param>
         <param-name>org.apache.myfaces.COMPRESS_STATE_IN_SESSION</param-name>
         <param-value>false</param-value>
 
     </context-param>
 
-	<context-param>
+    <context-param>
         <param-name>org.apache.myfaces.SERIALIZE_STATE_IN_SESSION</param-name>
         <param-value>false</param-value>
     </context-param>
-    
+
     <context-param>
         <param-name>org.apache.myfaces.NUMBER_OF_VIEWS_IN_SESSION</param-name>
 
-        <param-value>1</param-value>    
+        <param-value>1</param-value>
     </context-param>
-      
+
     <context-param>
         <param-name>org.apache.myfaces.USE_ENCRYPTION</param-name>
-        <param-value>false</param-value>    
+        <param-value>false</param-value>
     </context-param>
-    
+
     <servlet>
-    	<servlet-name>Faces Servlet</servlet-name>
-    	<servlet-class>javax.faces.webapp.FacesServlet</servlet-class>
-    	<load-on-startup>-1</load-on-startup>
-    	<enabled>true</enabled>
-    	<async-supported>false</async-supported>
+        <servlet-name>Faces Servlet</servlet-name>
+        <servlet-class>jakarta.faces.webapp.FacesServlet</servlet-class>
+        <load-on-startup>-1</load-on-startup>
+        <enabled>true</enabled>
+        <async-supported>false</async-supported>
     </servlet>
 
     <servlet-mapping>
-    	<servlet-name>Faces Servlet</servlet-name>
-    	<url-pattern>*.jsf</url-pattern>
+        <servlet-name>Faces Servlet</servlet-name>
+        <url-pattern>*.jsf</url-pattern>
     </servlet-mapping>
-    
-    
+
 
     <session-config>
         <session-timeout>30</session-timeout>
     </session-config>
-    
+
     <welcome-file-list>
         <welcome-file>index.html</welcome-file>
     </welcome-file-list>
-    
+
     <error-page>
         <exception-type>java.lang.Exception</exception-type>
         <location>/error.jsp</location>
     </error-page>
-    
+
     <error-page>
         <error-code>500</error-code>
         <location>/error.jsp</location>
     </error-page>
-    
-  <resource-ref>
+
+    <resource-ref>
         <res-ref-name>jdbc/TradeDataSource</res-ref-name>
         <res-type>javax.sql.DataSource</res-type>
         <res-auth>Container</res-auth>
@@ -125,23 +128,23 @@ This may disable custom JSF extensions, such as factories defined in the project
     </resource-ref>
     <resource-ref>
         <res-ref-name>jms/QueueConnectionFactory</res-ref-name>
-        <res-type>javax.jms.QueueConnectionFactory</res-type>
+        <res-type>jakarta.jms.QueueConnectionFactory</res-type>
         <res-auth>Application</res-auth>
         <res-sharing-scope>Shareable</res-sharing-scope>
     </resource-ref>
     <resource-ref>
         <res-ref-name>jms/TopicConnectionFactory</res-ref-name>
-        <res-type>javax.jms.TopicConnectionFactory</res-type>
+        <res-type>jakarta.jms.TopicConnectionFactory</res-type>
         <res-auth>Application</res-auth>
         <res-sharing-scope>Shareable</res-sharing-scope>
-    </resource-ref>    
-    
-     <ejb-local-ref>
+    </resource-ref>
+
+    <ejb-local-ref>
         <ejb-ref-name>web/ejb/local/TradeSLSBBean</ejb-ref-name>
-        <ejb-ref-type>Session</ejb-ref-type>        
+        <ejb-ref-type>Session</ejb-ref-type>
         <local>com.ibm.websphere.samples.daytrader.ejb3.TradeSLSBLocal</local>
     </ejb-local-ref>
-    
+
     <ejb-local-ref>
         <ejb-ref-name>web/ejb/local/DirectSLSBBean</ejb-ref-name>
         <ejb-ref-type>Session</ejb-ref-type>
@@ -150,13 +153,13 @@ This may disable custom JSF extensions, such as factories defined in the project
 
     <message-destination-ref>
         <message-destination-ref-name>jms/TradeBrokerQueue</message-destination-ref-name>
-        <message-destination-type>javax.jms.Queue</message-destination-type>
+        <message-destination-type>jakarta.jms.Queue</message-destination-type>
         <message-destination-usage>Produces</message-destination-usage>
         <message-destination-link>dt-ejb.jar#TradeBrokerQueue</message-destination-link>
     </message-destination-ref>
     <message-destination-ref>
         <message-destination-ref-name>jms/TradeStreamerTopic</message-destination-ref-name>
-        <message-destination-type>javax.jms.Topic</message-destination-type>
+        <message-destination-type>jakarta.jms.Topic</message-destination-type>
         <message-destination-usage>Produces</message-destination-usage>
         <message-destination-link>dt-ejb.jar#TradeStreamerTopic</message-destination-link>
     </message-destination-ref>

@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
- * 
+ *
  *   http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -21,14 +21,14 @@ package com.ibm.websphere.samples.daytrader.rest;
 
 import java.util.List;
 
-import javax.ws.rs.Consumes;
-import javax.ws.rs.GET;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.xml.bind.annotation.XmlRootElement;
+import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.HttpHeaders;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
+import jakarta.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement
 public class Address {
@@ -59,9 +59,13 @@ public class Address {
     }
 
     @GET
-    @Consumes(value = { "text/xml", "application/x-www-form-urlencoded" })
-    @Produces(value = { "text/xml" })
+    @Consumes(value = {"text/xml", "application/x-www-form-urlencoded"})
+    @Produces(value = {"text/xml"})
     public Response get(@Context HttpHeaders headers) {
+        // Retain the legacy GET contract: requests without Content-Type were rejected.
+        if (headers.getHeaderString(HttpHeaders.CONTENT_TYPE) == null) {
+            return Response.status(Response.Status.UNSUPPORTED_MEDIA_TYPE).build();
+        }
         List<MediaType> acceptTypes = headers.getAcceptableMediaTypes();
         Response r = null;
         if (acceptTypes.contains(MediaType.TEXT_XML)) {

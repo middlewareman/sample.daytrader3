@@ -1,4 +1,11 @@
-# Gradle and IntelliJ IDEA baseline
+# Gradle and IntelliJ IDEA
+
+On this Jakarta migration branch, use the [Java 21 / Jakarta EE 11 guide](Jakarta-EE11.md).
+Select a Java 21 Gradle JVM and reimport the project; keep Java 8 available for
+the independent verification module. Register nonstandard JDK paths through
+`-Porg.gradle.java.installations.paths` in run parameters or local Gradle properties.
+All application modules compile to Java 21 bytecode. The remainder of this file
+records the prior baseline setup, rather than current target instructions.
 
 Use the checked-in Gradle **8.14.3** wrapper with a **Java 8 JDK**. The
 Liberty plugin is pinned to **3.10.0**. The Java 8 toolchain fixes the compiler

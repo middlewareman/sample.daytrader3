@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
- * 
+ *
  *   http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -22,30 +22,30 @@ package com.ibm.websphere.samples.daytrader.rest;
 import java.util.Iterator;
 import java.util.List;
 
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
+import jakarta.ws.rs.Produces;
 
 @Path(value = "/addresses")
 public class AddressBook {
 
     static {
 
-          Address Addr = new Address("Entry5", "12345", "Address", "City", "State", "Country");
-          AddressBookDatabase.storeAddress("Entry5", Addr);
+        Address Addr = new Address("Entry5", "12345", "Address", "City", "State", "Country");
+        AddressBookDatabase.storeAddress("Entry5", Addr);
 
-          Addr = new Address("Entry4", "12345", "Address", "City", "State", "Country");
-          AddressBookDatabase.storeAddress("Entry4", Addr);
+        Addr = new Address("Entry4", "12345", "Address", "City", "State", "Country");
+        AddressBookDatabase.storeAddress("Entry4", Addr);
 
-          Addr = new Address("Entry3", "12345", "Address", "City", "State", "Country");
-          AddressBookDatabase.storeAddress("Entry3", Addr);
-          
-          Addr = new Address("Entry2", "12345", "Address", "City", "State", "Country");
-          AddressBookDatabase.storeAddress("Entry2", Addr);
+        Addr = new Address("Entry3", "12345", "Address", "City", "State", "Country");
+        AddressBookDatabase.storeAddress("Entry3", Addr);
 
-          Addr = new Address("Entry1", "12345", "Address", "City", "State", "Country");
-          AddressBookDatabase.storeAddress("Entry1", Addr);
+        Addr = new Address("Entry2", "12345", "Address", "City", "State", "Country");
+        AddressBookDatabase.storeAddress("Entry2", Addr);
+
+        Addr = new Address("Entry1", "12345", "Address", "City", "State", "Country");
+        AddressBookDatabase.storeAddress("Entry1", Addr);
 
     }
 
@@ -55,7 +55,7 @@ public class AddressBook {
 
     @GET
     @Path(value = "/search/{searchstring}")
-    @Produces(value = { "application/json" })
+    @Produces(value = {"application/json"})
     public AddressList search(@PathParam(value = "searchstring") String searchString) {
         AddressList addressList = new AddressList();
         List<Address> addresses = addressList.getAddresses();
@@ -70,7 +70,7 @@ public class AddressBook {
     }
 
     @GET
-    @Produces(value = { "application/json" })
+    @Produces(value = {"application/json"})
     public AddressList getAddresses() {
         AddressList addressList = new AddressList();
         List<Address> addresses = addressList.getAddresses();
