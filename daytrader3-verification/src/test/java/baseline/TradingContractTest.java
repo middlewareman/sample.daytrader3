@@ -14,6 +14,11 @@ import java.nio.file.Paths;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Properties;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -168,6 +173,104 @@ class TradingContractTest {
         remember(account, finalCash, 0, 2);
         rememberOrder(buy, buyPrice, "buy", quantity);
         rememberOrder(sell, sellPrice, "sell", quantity);
+    }
+
+    @Test
+    void simultaneousPurchasesFromIndependentSessionsPreserveBothDebitsAndHoldings() throws Exception {
+        int account = 20;
+        TradeClient first = new TradeClient(), second = new TradeClient();
+        client = first; // The bounded order-completion helper must use an authenticated session.
+        assertEquals(200, first.login(account).status);
+        assertEquals(200, second.login(account).status);
+        assertTrue(first.orders().isEmpty());
+        assertTrue(first.holdings().isEmpty());
+        BigDecimal firstPrice = new BigDecimal("70.00"), secondPrice = new BigDecimal("71.00");
+        BigDecimal firstQuantity = new BigDecimal("2"), secondQuantity = new BigDecimal("3");
+        moneyEquals(firstPrice, first.quote("s:20"));
+        moneyEquals(secondPrice, second.quote("s:21"));
+        BigDecimal cash = initialCash(account).subtract(firstPrice.multiply(firstQuantity))
+                .subtract(secondPrice.multiply(secondQuantity)).subtract(FEE.multiply(new BigDecimal("2")));
+        // Retain the independently calculated expectation even if a financial assertion fails.
+        remember(account, cash, 2, 2);
+
+        CountDownLatch ready = new CountDownLatch(2), start = new CountDownLatch(1);
+        ExecutorService workers = Executors.newFixedThreadPool(2);
+        long[] firstInterval = new long[2], secondInterval = new long[2];
+        try {
+            Future<TradeClient.Response> firstResult = workers.submit(() -> {
+                ready.countDown();
+                assertTrue(start.await(10, TimeUnit.SECONDS), "First purchase start timed out");
+                firstInterval[0] = System.nanoTime();
+                try {
+                    return first.action("action", "buy", "symbol", "s:20", "quantity", "2");
+                } finally {
+                    firstInterval[1] = System.nanoTime();
+                }
+            });
+            Future<TradeClient.Response> secondResult = workers.submit(() -> {
+                ready.countDown();
+                assertTrue(start.await(10, TimeUnit.SECONDS), "Second purchase start timed out");
+                secondInterval[0] = System.nanoTime();
+                try {
+                    return second.action("action", "buy", "symbol", "s:21", "quantity", "3");
+                } finally {
+                    secondInterval[1] = System.nanoTime();
+                }
+            });
+            assertTrue(ready.await(10, TimeUnit.SECONDS), "Both purchase workers must be ready");
+            start.countDown();
+            TradeClient.Response firstResponse = firstResult.get(20, TimeUnit.SECONDS);
+            TradeClient.Response secondResponse = secondResult.get(20, TimeUnit.SECONDS);
+            assertAll("Concurrent purchase responses",
+                    () -> assertEquals(200, firstResponse.status, firstResponse.text()),
+                    () -> assertEquals(200, secondResponse.status, secondResponse.text()),
+                    () -> assertTrue(Math.max(firstInterval[0], secondInterval[0]) < Math.min(firstInterval[1], secondInterval[1]),
+                            "Client request intervals must overlap; serial execution is not this scenario"));
+        } finally {
+            start.countDown();
+            workers.shutdownNow();
+            assertTrue(workers.awaitTermination(5, TimeUnit.SECONDS), "Purchase workers did not stop");
+        }
+        expected.setProperty("concurrent.first.startNanos", "" + firstInterval[0]);
+        expected.setProperty("concurrent.first.endNanos", "" + firstInterval[1]);
+        expected.setProperty("concurrent.second.startNanos", "" + secondInterval[0]);
+        expected.setProperty("concurrent.second.endNanos", "" + secondInterval[1]);
+
+        List<TradeClient.Order> orders = first.orders();
+        List<TradeClient.Holding> holdings = first.holdings();
+        assertEquals(2, orders.size());
+        assertEquals(2, holdings.size());
+        assertNotEquals(orders.get(0).id, orders.get(1).id);
+        assertNotEquals(holdings.get(0).id, holdings.get(1).id);
+        for (String symbol : new String[]{"s:20", "s:21"}) {
+            TradeClient.Order order = orders.stream().filter(o -> o.symbol.equals(symbol)).findFirst()
+                    .orElseThrow(() -> new AssertionError("Missing order for " + symbol));
+            order = awaitOrder(order.id);
+            TradeClient.Holding holding = holdings.stream().filter(h -> h.symbol.equals(symbol)).findFirst()
+                    .orElseThrow(() -> new AssertionError("Missing holding for " + symbol));
+            BigDecimal price = symbol.equals("s:20") ? firstPrice : secondPrice;
+            BigDecimal quantity = symbol.equals("s:20") ? firstQuantity : secondQuantity;
+            assertEquals("buy", order.type);
+            moneyEquals(FEE, order.fee);
+            moneyEquals(price, order.price);
+            moneyEquals(quantity, order.quantity);
+            moneyEquals(price, holding.price);
+            moneyEquals(quantity, holding.quantity);
+            String prefix = "concurrent." + symbol;
+            expected.setProperty(prefix + ".order", "" + order.id);
+            expected.setProperty(prefix + ".holding", "" + holding.id);
+            expected.setProperty(prefix + ".price", price.toPlainString());
+            expected.setProperty(prefix + ".quantity", quantity.toPlainString());
+        }
+        first.logout();
+        second.logout();
+        TradeClient fresh = new TradeClient();
+        assertEquals(200, fresh.login(account).status);
+        assertAll("Both committed purchases survive a fresh session",
+                () -> moneyEquals(cash, TradeClient.cash(fresh.account())),
+                () -> assertEquals(2, fresh.orders().size()),
+                () -> assertEquals(2, fresh.holdings().size()));
+        fresh.logout();
     }
 
     @Test

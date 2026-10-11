@@ -28,7 +28,7 @@ class RestartPersistenceTest {
     }
 
     @ParameterizedTest(name = "durable trading state after restart: account {0}")
-    @ValueSource(ints = {4, 5, 10, 11, 12, 13})
+    @ValueSource(ints = {4, 5, 10, 11, 12, 13, 20})
     void cashAndHoldingsSurviveRestart(int account) throws Exception {
         TradeClient client = new TradeClient();
         TradeClient.Response login = client.login(account);
@@ -40,7 +40,7 @@ class RestartPersistenceTest {
     }
 
     @ParameterizedTest(name = "order history survives restart: account {0}")
-    @ValueSource(ints = {4, 5, 10, 11, 12, 13})
+    @ValueSource(ints = {4, 5, 10, 11, 12, 13, 20})
     void orderHistorySurvivesRestart(int account) throws Exception {
         TradeClient client = new TradeClient();
         assertEquals(200, client.login(account).status);

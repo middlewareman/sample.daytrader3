@@ -17,6 +17,26 @@ application classes retain Java 7 bytecode; test classes and the JUnit runner us
 Java 8. JUnit Platform launcher 1.10.3 is explicit rather than supplied by Gradle.
 IBM Liberty 24.0.0.9 and the Java EE 6 features remain unchanged.
 
+## Known concurrency failure
+
+The concurrency-baseline branch adds a strict two-session, same-account purchase
+check. Two overlapping requests buy `s:20` (2 shares at 70.00) and `s:21`
+(3 shares at 71.00), with a 24.95 fee each. Expected cash is 29597.10 from
+30000.00. In two reset-fixture runs, both orders and holdings persisted but cash
+reflected only one debit: 29835.05 or 29762.05. Stopped-DB checks confirmed both
+results; restart checks confirmed the first. The ordinary build is therefore
+currently red on this branch. The earlier tooling branch retains the passing
+44-case suite. No application code or assertion has been weakened to hide this
+failure. The full 49-case suite adds the concurrency scenario, two restart cases
+and two SQL cases; follow-up diagnostics do not constitute a successful build.
+
+The client intervals overlap, but the harness does not force a particular server
+transaction interleaving. Configuration is set once before worker dispatch, and
+each worker uses its own HTTP cookie/session state. Restart/SQL checks use the
+same independent financial expectations. Original SQL checks retain their nine
+orders and one holding, excluding only the new account 20; separate strict
+checks verify its order-to-holding links, prices, quantities, fees and ownership.
+
 ## Test structure and pinned tools
 
 - EJB unit tests: JUnit Jupiter 5.10.3, exercising financial gains and portfolio
@@ -58,8 +78,14 @@ After restart it reapplies the Full EJB synchronous functional configuration.
 DayTrader configuration flags are JVM-local: the default long-run benchmark mode
 suppresses account-page order history and must be disabled for these checks.
 Reapplying configuration does not reload the fixture or change expected state.
-Gradle finalizers stop the test server even after a test-task failure. Mutable
-server tests deliberately rerun instead of using up-to-date/build-cache outcomes.
+Gradle finalizers stop the test server even after a test-task failure.
+Shutdown tasks are finalizers ordered before restart/SQL, rather than shared
+prerequisites of those phases. A failure in the full HTTP build previously left
+the server running; removing those prerequisite edges restored shutdown on HTTP
+and restart assertion failures. Explicit stop remains available after external
+termination.
+
+Mutable server tests deliberately rerun instead of using up-to-date/build-cache outcomes.
 Long performance runs are outside this build.
 
 Default test ports are HTTP 19083, HTTPS 19443, JMS 17276, and JMS SSL 17286.

@@ -45,7 +45,7 @@ class PersistedStateTest {
     }
 
     @ParameterizedTest(name = "persisted trading state for account {0}")
-    @ValueSource(ints = {4, 5, 10, 11, 12, 13})
+    @ValueSource(ints = {4, 5, 10, 11, 12, 13, 20})
     void cashHoldingsAndOrderCountsMatchBusinessExpectations(int account) throws Exception {
         assertNotNull(expected.getProperty(account + ".cash"), "Missing scenario outcome");
         try (ResultSet row = query("SELECT BALANCE FROM ACCOUNTEJB WHERE ACCOUNTID=?", account)) {
@@ -67,7 +67,7 @@ class PersistedStateTest {
         long expectedOrders = expected.stringPropertyNames().stream().filter(k -> k.startsWith("order.") && k.endsWith(".type")).count();
         assertEquals(9, expectedOrders, "Every trading profile must contribute its orders");
         int checked = 0;
-        try (ResultSet rows = query("SELECT ORDERID,ORDERTYPE,ORDERSTATUS,PRICE,QUANTITY,ORDERFEE,QUOTE_SYMBOL,COMPLETIONDATE FROM ORDEREJB")) {
+        try (ResultSet rows = query("SELECT ORDERID,ORDERTYPE,ORDERSTATUS,PRICE,QUANTITY,ORDERFEE,QUOTE_SYMBOL,COMPLETIONDATE FROM ORDEREJB WHERE ACCOUNT_ACCOUNTID<>20")) {
             while (rows.next()) {
                 String prefix = "order." + rows.getInt(1);
                 assertNotNull(expected.getProperty(prefix + ".type"), "Unexpected persisted order");
@@ -86,7 +86,7 @@ class PersistedStateTest {
 
     @Test
     void persistedHoldingRetainsPurchasePriceQuantityAndOwner() throws Exception {
-        try (ResultSet row = query("SELECT HOLDINGID,ACCOUNT_ACCOUNTID,PURCHASEPRICE,QUANTITY,QUOTE_SYMBOL FROM HOLDINGEJB")) {
+        try (ResultSet row = query("SELECT HOLDINGID,ACCOUNT_ACCOUNTID,PURCHASEPRICE,QUANTITY,QUOTE_SYMBOL FROM HOLDINGEJB WHERE ACCOUNT_ACCOUNTID<>20")) {
             assertTrue(row.next());
             String prefix = "holding." + row.getInt(1);
             assertEquals(Integer.parseInt(expected.getProperty(prefix + ".account")), row.getInt(2));
@@ -94,6 +94,33 @@ class PersistedStateTest {
             TradingContractTest.moneyEquals(new BigDecimal(expected.getProperty(prefix + ".quantity")), BigDecimal.valueOf(row.getDouble(4)));
             assertEquals(expected.getProperty(prefix + ".symbol"), row.getString(5));
             assertFalse(row.next());
+        }
+    }
+
+    @Test
+    void concurrentPurchasesPersistDistinctOrdersAndHoldingsWithExecutionValues() throws Exception {
+        for (String symbol : new String[]{"s:20", "s:21"}) {
+            String prefix = "concurrent." + symbol;
+            assertNotNull(expected.getProperty(prefix + ".order"), "Missing concurrent order identity");
+            try (ResultSet order = query("SELECT ORDERID,ORDERTYPE,ORDERSTATUS,PRICE,QUANTITY,ORDERFEE,COMPLETIONDATE,HOLDING_HOLDINGID FROM ORDEREJB WHERE ACCOUNT_ACCOUNTID=20 AND QUOTE_SYMBOL=?", symbol)) {
+                assertTrue(order.next());
+                assertEquals(Integer.parseInt(expected.getProperty(prefix + ".order")), order.getInt(1));
+                assertEquals("buy", order.getString(2));
+                assertEquals("completed", order.getString(3));
+                TradingContractTest.moneyEquals(new BigDecimal(expected.getProperty(prefix + ".price")), order.getBigDecimal(4));
+                TradingContractTest.moneyEquals(new BigDecimal(expected.getProperty(prefix + ".quantity")), BigDecimal.valueOf(order.getDouble(5)));
+                TradingContractTest.moneyEquals(new BigDecimal("24.95"), order.getBigDecimal(6));
+                assertNotNull(order.getTimestamp(7));
+                assertEquals(Integer.parseInt(expected.getProperty(prefix + ".holding")), order.getInt(8));
+                assertFalse(order.next());
+            }
+            try (ResultSet holding = query("SELECT HOLDINGID,PURCHASEPRICE,QUANTITY FROM HOLDINGEJB WHERE ACCOUNT_ACCOUNTID=20 AND QUOTE_SYMBOL=?", symbol)) {
+                assertTrue(holding.next());
+                assertEquals(Integer.parseInt(expected.getProperty(prefix + ".holding")), holding.getInt(1));
+                TradingContractTest.moneyEquals(new BigDecimal(expected.getProperty(prefix + ".price")), holding.getBigDecimal(2));
+                TradingContractTest.moneyEquals(new BigDecimal(expected.getProperty(prefix + ".quantity")), BigDecimal.valueOf(holding.getDouble(3)));
+                assertFalse(holding.next());
+            }
         }
     }
 

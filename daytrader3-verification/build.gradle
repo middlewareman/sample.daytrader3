@@ -147,7 +147,7 @@ task stopAfterRestart(type: Exec) {
                     'stop', 'daytrader3_Baseline'
     }
 }
-task restartTestServer(type: Exec, dependsOn: [test, stopTestServer]) {
+task restartTestServer(type: Exec, dependsOn: test) {
     environment 'JAVA_HOME', javaHome
     environment 'WLP_USER_DIR', testUser.absolutePath
     environment 'WLP_OUTPUT_DIR', testOutput.absolutePath
@@ -158,6 +158,8 @@ task restartTestServer(type: Exec, dependsOn: [test, stopTestServer]) {
     doLast awaitReady
     finalizedBy stopAfterRestart
 }
+// Keep shutdown as a finalizer, not a shared prerequisite that can be skipped on failure.
+restartTestServer.mustRunAfter stopTestServer
 task restartTest(type: Test, dependsOn: restartTestServer) {
     description = 'Checks business state through fresh sessions after a Liberty restart.'
     testClassesDirs = sourceSets.test.output.classesDirs
@@ -173,7 +175,7 @@ task restartTest(type: Test, dependsOn: restartTestServer) {
 }
 stopAfterRestart.mustRunAfter restartTest
 
-task persistedTest(type: Test, dependsOn: [restartTest, stopAfterRestart]) {
+task persistedTest(type: Test, dependsOn: restartTest) {
     description = 'Checks trading state directly in Derby after Liberty releases the database.'
     testClassesDirs = sourceSets.test.output.classesDirs
     classpath = sourceSets.test.runtimeClasspath
@@ -186,6 +188,7 @@ task persistedTest(type: Test, dependsOn: [restartTest, stopAfterRestart]) {
     systemProperty 'daytrader.database', database.absolutePath
     systemProperty 'daytrader.expectedState', file("$buildDir/expected-state.properties").absolutePath
 }
+persistedTest.mustRunAfter stopAfterRestart
 
 task prepareCoverageClasses(dependsOn: [persistedTest, ':daytrader3-ee6-ejb:test']) {
     doLast {
