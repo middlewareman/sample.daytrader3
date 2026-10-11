@@ -1,18 +1,18 @@
 /**
- *  Licensed to the Apache Software Foundation (ASF) under one or more
- *  contributor license agreements.  See the NOTICE file distributed with
- *  this work for additional information regarding copyright ownership.
- *  The ASF licenses this file to You under the Apache License, Version 2.0
- *  (the "License"); you may not use this file except in compliance with
- *  the License.  You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 package com.ibm.websphere.samples.daytrader.ejb3;
@@ -41,6 +41,7 @@ import javax.jms.TextMessage;
 import javax.jms.Topic;
 import javax.jms.TopicConnectionFactory;
 import javax.persistence.EntityManager;
+import javax.persistence.LockModeType;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 import javax.transaction.RollbackException;
@@ -79,6 +80,12 @@ public class TradeSLSBBean implements TradeSLSBLocal {
 
     @Resource
     private SessionContext context;
+
+    private void lockAccountForUpdate(AccountDataBean account) {
+        // The profile relationship may already have loaded a stale balance. Refresh
+        // while taking the database lock, held until the container transaction ends.
+        entityManager.refresh(account, LockModeType.PESSIMISTIC_WRITE);
+    }
 
     /** Creates a new instance of TradeSLSBBean */
     public TradeSLSBBean() {
@@ -145,6 +152,7 @@ public class TradeSLSBBean implements TradeSLSBLocal {
 
             AccountProfileDataBean profile = entityManager.find(AccountProfileDataBean.class, userID);
             AccountDataBean account = profile.getAccount();
+            lockAccountForUpdate(account);
             QuoteDataBean quote = entityManager.find(QuoteDataBean.class, symbol);
             HoldingDataBean holding = null; // The holding will be created by this buy order
 
@@ -181,6 +189,7 @@ public class TradeSLSBBean implements TradeSLSBLocal {
 
             AccountProfileDataBean profile = entityManager.find(AccountProfileDataBean.class, userID);
             AccountDataBean account = profile.getAccount();
+            lockAccountForUpdate(account);
             HoldingDataBean holding = entityManager.find(HoldingDataBean.class, holdingID);
 
             if (holding == null) {
@@ -261,7 +270,7 @@ public class TradeSLSBBean implements TradeSLSBLocal {
 
     @Override
     public OrderDataBean completeOrder(Integer orderID, boolean twoPhase)
-                    throws Exception {
+            throws Exception {
         if (Log.doTrace())
             Log.trace("TradeSLSBBean:completeOrder", orderID + " twoPhase=" + twoPhase);
 
@@ -286,10 +295,10 @@ public class TradeSLSBBean implements TradeSLSBLocal {
 
         if (Log.doTrace())
             Log.trace("TradeSLSBBeanInternal:completeOrder--> Completing Order " + order.getOrderID()
-                      + "\n\t Order info: " + order
-                      + "\n\t Account info: " + account
-                      + "\n\t Quote info: " + quote
-                      + "\n\t Holding info: " + holding);
+                    + "\n\t Order info: " + order
+                    + "\n\t Account info: " + account
+                    + "\n\t Quote info: " + quote
+                    + "\n\t Holding info: " + holding);
 
         if (order.isBuy()) {
             /*
@@ -323,10 +332,10 @@ public class TradeSLSBBean implements TradeSLSBLocal {
 
         if (Log.doTrace())
             Log.trace("TradeSLSBBean:completeOrder--> Completed Order " + order.getOrderID()
-                      + "\n\t Order info: " + order
-                      + "\n\t Account info: " + account
-                      + "\n\t Quote info: " + quote
-                      + "\n\t Holding info: " + holding);
+                    + "\n\t Order info: " + order
+                    + "\n\t Account info: " + account
+                    + "\n\t Quote info: " + quote
+                    + "\n\t Holding info: " + holding);
 
         //if (Log.doTrace())
         //    Log.trace("Calling TradeAction:orderCompleted from Session EJB using Session Object");
@@ -523,9 +532,9 @@ public class TradeSLSBBean implements TradeSLSBLocal {
          * profileData.getUserID()); // In order for the object to merge
          * correctly, the account has to be hooked into the temp object... // -
          * may need to reverse this and obtain the full object first
-         * 
+         *
          * profileData.setAccount(temp.getAccount());
-         * 
+         *
          * //TODO this might not be correct temp =
          * entityManager.merge(profileData); //System.out.println(temp);
          */
@@ -551,6 +560,7 @@ public class TradeSLSBBean implements TradeSLSBLocal {
         }
         entityManager.merge(profile);
         AccountDataBean account = profile.getAccount();
+        lockAccountForUpdate(account);
 
         if (Log.doTrace())
             Log.trace("TradeSLSBBean:login", userID, password);
@@ -569,6 +579,7 @@ public class TradeSLSBBean implements TradeSLSBLocal {
         AccountProfileDataBean profile = entityManager.find(AccountProfileDataBean.class, userID);
         AccountDataBean account = profile.getAccount();
 
+        lockAccountForUpdate(account);
         account.logout();
 
         if (Log.doTrace())
@@ -666,14 +677,14 @@ public class TradeSLSBBean implements TradeSLSBLocal {
 
         if (Log.doTrace())
             Log.trace("TradeSLSBBean:createOrder(orderID="
-                      + " account=" + ((account == null) ? null : account.getAccountID())
-                      + " quote=" + ((quote == null) ? null : quote.getSymbol())
-                      + " orderType=" + orderType
-                      + " quantity=" + quantity);
+                    + " account=" + ((account == null) ? null : account.getAccountID())
+                    + " quote=" + ((quote == null) ? null : quote.getSymbol())
+                    + " orderType=" + orderType
+                    + " quantity=" + quantity);
         try {
             order = new OrderDataBean(orderType, "open", new Timestamp(System.currentTimeMillis()), null, quantity, quote.getPrice().setScale(FinancialUtils.SCALE,
-                                                                                                                                              FinancialUtils.ROUND),
-                            TradeConfig.getOrderFee(orderType), account, quote, holding);
+                    FinancialUtils.ROUND),
+                    TradeConfig.getOrderFee(orderType), account, quote, holding);
             entityManager.persist(order);
         } catch (Exception e) {
             Log.error("TradeSLSBBean:createOrder -- failed to create Order", e);
@@ -725,9 +736,7 @@ public class TradeSLSBBean implements TradeSLSBLocal {
                 msgProducer.send(message);
             } catch (Exception e) {
                 Log.error("TradeSLSBBean:pingTwoPhase -- exception caught", e);
-            }
-
-            finally {
+            } finally {
                 if (conn != null)
                     conn.close();
                 if (sess != null)
@@ -751,8 +760,7 @@ public class TradeSLSBBean implements TradeSLSBLocal {
 
     @PostConstruct
     public void postConstruct() {
-        if (Log.doTrace())
-        {
+        if (Log.doTrace()) {
             Log.trace("updateQuotePrices: " + TradeConfig.getUpdateQuotePrices());
             Log.trace("publishQuotePriceChange: " + TradeConfig.getPublishQuotePriceChange());
         }

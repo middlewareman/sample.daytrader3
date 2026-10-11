@@ -17,18 +17,18 @@ application classes retain Java 7 bytecode; test classes and the JUnit runner us
 Java 8. JUnit Platform launcher 1.10.3 is explicit rather than supplied by Gradle.
 IBM Liberty 24.0.0.9 and the Java EE 6 features remain unchanged.
 
-## Known concurrency failure
+## Concurrent account repair
 
-The concurrency-baseline branch adds a strict two-session, same-account purchase
-check. Two overlapping requests buy `s:20` (2 shares at 70.00) and `s:21`
-(3 shares at 71.00), with a 24.95 fee each. Expected cash is 29597.10 from
-30000.00. In two reset-fixture runs, both orders and holdings persisted but cash
-reflected only one debit: 29835.05 or 29762.05. Stopped-DB checks confirmed both
-results; restart checks confirmed the first. The ordinary build is therefore
-currently red on this branch. The earlier tooling branch retains the passing
-44-case suite. No application code or assertion has been weakened to hide this
-failure. The full 49-case suite adds the concurrency scenario, two restart cases
-and two SQL cases; follow-up diagnostics do not constitute a successful build.
+The original concurrency-baseline revision exposes a durable lost debit: two
+purchases require cash 29597.10, but only one debit survives. That failing
+revision is retained separately. On `repair/concurrent-account-updates`, Full EJB
+buy/sell/login/logout refresh the account with `PESSIMISTIC_WRITE` before mutation,
+holding the database lock until the container transaction ends. This rereads state
+that the profile relationship may already have loaded. Two shell builds and an
+IDEA build pass the unchanged 49-case suite; the shell runs also execute all eight
+unit cases freshly. The full suite includes concurrency, restart and SQL
+verification. No assertion changed. Same-account serialization can affect
+throughput; measurements and uncovered contention profiles are reported separately.
 
 The client intervals overlap, but the harness does not force a particular server
 transaction interleaving. Configuration is set once before worker dispatch, and

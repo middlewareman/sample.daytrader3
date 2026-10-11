@@ -18,8 +18,11 @@ on Java 8 for the verified setup and interactive server commands.
 4. Sync Gradle. Remove any stale link to a previous checkout location.
 
 IDEA 2026.2.3 imported and built the earlier Gradle 4.10.3 restoration.
-The tooling upgrade has been validated through the shell; IDEA reimport and
-execution of the upgraded build remain unverified. Apply the project code style
+The upgraded build and concurrent account repair have now passed the parent
+workspace’s **DayTrader Build** configuration, including isolated HTTP/restart/SQL
+checks and server shutdown. Compilation was up-to-date in that IDEA run; clean
+compilation was verified separately through the shell. Explicit IDEA reimport and
+interactive startup remain unverified. Apply the project code style
 before committing changed code. Gradle 8.14.3 supports running on Java 8, but
 Gradle 9 requires a newer daemon JVM and a separate Liberty plugin upgrade.
 
