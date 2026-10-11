@@ -43,7 +43,9 @@ task prepareTestServer(dependsOn: [':daytrader3-ee6:ear', ':daytrader3-ee6:insta
                 socket.reuseAddress = true
                 socket.bind(new java.net.InetSocketAddress('localhost', Integer.parseInt(port)))
             }
-        } finally { probes.each { it.close() } }
+        } finally {
+            probes.each { it.close() }
+        }
         def lock = new File(testOutput, 'daytrader3_Baseline/workarea/.sLock')
         if (lock.exists()) {
             def channel = java.nio.channels.FileChannel.open(lock.toPath(), java.nio.file.StandardOpenOption.WRITE)
@@ -51,16 +53,18 @@ task prepareTestServer(dependsOn: [':daytrader3-ee6:ear', ':daytrader3-ee6:insta
                 def held = channel.tryLock()
                 if (held == null) throw new GradleException('Test server is running; stopTestServer before resetting the fixture.')
                 held.release()
-            } finally { channel.close() }
+            } finally {
+                channel.close()
+            }
         }
         delete testUser, testOutput, coverage, file("$buildDir/expected-state.properties"), file("$buildDir/runtime-classes")
         def server = new File(testUser, 'servers/daytrader3_Baseline')
         server.mkdirs()
         def xml = rootProject.file('daytrader3-ee6-wlpcfg/servers/daytrader3_Sample/server.xml').text
         xml = xml.replace('httpPort="9083"', 'httpPort="' + testPort + '"')
-                 .replace('httpsPort="9443"', 'httpsPort="' + testHttpsPort + '"')
-                 .replace('location="daytrader3-ee6.ear"', 'location="' + earProject.tasks.ear.archivePath.absolutePath + '"')
-                 .replace('</server>', '<wasJmsEndpoint wasJmsPort="' + testJmsPort + '" wasJmsSSLPort="' + testJmsSslPort + '" /></server>')
+                .replace('httpsPort="9443"', 'httpsPort="' + testHttpsPort + '"')
+                .replace('location="daytrader3-ee6.ear"', 'location="' + earProject.tasks.ear.archivePath.absolutePath + '"')
+                .replace('</server>', '<wasJmsEndpoint wasJmsPort="' + testJmsPort + '" wasJmsSSLPort="' + testJmsSslPort + '" /></server>')
         new File(server, 'server.xml').text = xml
         copy {
             from configurations.runtimeClasspath.filter { it.name == 'derby-10.10.1.1.jar' }
@@ -101,7 +105,8 @@ def awaitReady = {
             connection.readTimeout = 1000
             ready = connection.responseCode == 200
             connection.disconnect()
-        } catch (IOException ignored) { }
+        } catch (IOException ignored) {
+        }
         if (!ready) Thread.sleep(250)
     }
     if (!ready) throw new GradleException('Isolated DayTrader did not become ready within 90 seconds; inspect liberty-output.')

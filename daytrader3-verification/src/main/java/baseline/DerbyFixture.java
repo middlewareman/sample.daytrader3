@@ -3,9 +3,14 @@ package baseline;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+import java.sql.Statement;
 
-/** Loads a fixed fixture into the test-owned, stopped embedded database. */
+/**
+ * Loads a fixed fixture into the test-owned, stopped embedded database.
+ */
 public final class DerbyFixture {
     public static void main(String[] args) throws Exception {
         Class.forName("org.apache.derby.jdbc.EmbeddedDriver");
@@ -36,8 +41,11 @@ public final class DerbyFixture {
             }
             c.commit();
         }
-        try { DriverManager.getConnection(url + ";shutdown=true"); }
-        catch (SQLException stopped) { if (!"08006".equals(stopped.getSQLState())) throw stopped; }
+        try {
+            DriverManager.getConnection(url + ";shutdown=true");
+        } catch (SQLException stopped) {
+            if (!"08006".equals(stopped.getSQLState())) throw stopped;
+        }
         System.out.println("Deterministic fixture: 40 accounts, 40 quotes, zero holdings/orders; fixed timestamps and key seeds.");
     }
 }

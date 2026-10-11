@@ -1,38 +1,63 @@
 package baseline;
 
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
-import java.io.*;
+
+import java.io.IOException;
+import java.io.OutputStream;
 import java.math.BigDecimal;
-import java.nio.file.*;
-import java.util.*;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Properties;
+
 import static org.junit.jupiter.api.Assertions.*;
 
-/** Business assertions use test-owned values and an external HTTP adapter. */
+/**
+ * Business assertions use test-owned values and an external HTTP adapter.
+ */
 class TradingContractTest {
     private static final BigDecimal FEE = new BigDecimal("24.95");
     private static final Properties expected = new Properties();
     private TradeClient client;
 
-    static BigDecimal initialCash(int account) { return BigDecimal.valueOf(10000 + account * 1000).setScale(2); }
-    static void moneyEquals(BigDecimal wanted, BigDecimal actual) { assertEquals(0, wanted.compareTo(actual), wanted + " != " + actual); }
-    @BeforeEach void synchronousEjb() throws Exception { client = new TradeClient(); client.configure(0, 0); }
-    @AfterAll static void saveExpectedState() throws IOException {
+    static BigDecimal initialCash(int account) {
+        return BigDecimal.valueOf(10000 + account * 1000).setScale(2);
+    }
+
+    static void moneyEquals(BigDecimal wanted, BigDecimal actual) {
+        assertEquals(0, wanted.compareTo(actual), wanted + " != " + actual);
+    }
+
+    @BeforeEach
+    void synchronousEjb() throws Exception {
+        client = new TradeClient();
+        client.configure(0, 0);
+    }
+
+    @AfterAll
+    static void saveExpectedState() throws IOException {
         try (OutputStream out = Files.newOutputStream(Paths.get(System.getProperty("daytrader.expectedState")))) {
             expected.store(out, "Test-owned expected outcomes; values calculated before operations, not copied from database state");
         }
     }
+
     private void login(int account) throws Exception {
         TradeClient.Response result = client.login(account);
         assertEquals(200, result.status);
         assertTrue(result.text().contains("Welcome test:" + account + ","), result.text());
     }
+
     private void remember(int account, BigDecimal cash, int holdings, int orders) {
         expected.setProperty(account + ".cash", cash.toPlainString());
         expected.setProperty(account + ".holdings", "" + holdings);
         expected.setProperty(account + ".orders", "" + orders);
     }
+
     private TradeClient.Order awaitOrder(int id) throws Exception {
         long deadline = System.nanoTime() + java.util.concurrent.TimeUnit.SECONDS.toNanos(15);
         while (System.nanoTime() < deadline) {
@@ -42,12 +67,14 @@ class TradingContractTest {
         }
         throw new AssertionError("Order " + id + " did not become completed within 15 seconds");
     }
+
     private TradeClient.Order submittedOrder(TradeClient.Response result) throws Exception {
         assertEquals(200, result.status, result.text());
         List<TradeClient.Order> orders = client.orders();
         assertFalse(orders.isEmpty(), "No order was submitted");
         return orders.stream().max(Comparator.comparingInt(o -> o.id)).get();
     }
+
     private void rememberOrder(TradeClient.Order order, BigDecimal price, String type, BigDecimal quantity) {
         String prefix = "order." + order.id;
         expected.setProperty(prefix + ".type", type);
@@ -57,47 +84,67 @@ class TradingContractTest {
         expected.setProperty(prefix + ".status", "completed");
     }
 
-    @Test void quoteReturnsTheFixedFixturePrice() throws Exception {
-        login(3); moneyEquals(new BigDecimal("53.00"), client.quote("s:3"));
+    @Test
+    void quoteReturnsTheFixedFixturePrice() throws Exception {
+        login(3);
+        moneyEquals(new BigDecimal("53.00"), client.quote("s:3"));
     }
-    @Test void buyDebitsExecutionValueAndFeeAndCreatesHolding() throws Exception {
-        int account = 4; login(account);
+
+    @Test
+    void buyDebitsExecutionValueAndFeeAndCreatesHolding() throws Exception {
+        int account = 4;
+        login(account);
         assertTrue(client.holdings().isEmpty());
         BigDecimal price = new BigDecimal("54.00"), quantity = new BigDecimal("3");
         moneyEquals(price, client.quote("s:4"));
         BigDecimal cash = initialCash(account).subtract(price.multiply(quantity)).subtract(FEE);
         TradeClient.Order order = submittedOrder(client.action("action", "buy", "symbol", "s:4", "quantity", "3"));
         order = awaitOrder(order.id);
-        assertEquals("buy", order.type); assertEquals("s:4", order.symbol);
-        moneyEquals(FEE, order.fee); moneyEquals(price, order.price); moneyEquals(quantity, order.quantity);
+        assertEquals("buy", order.type);
+        assertEquals("s:4", order.symbol);
+        moneyEquals(FEE, order.fee);
+        moneyEquals(price, order.price);
+        moneyEquals(quantity, order.quantity);
         moneyEquals(cash, TradeClient.cash(client.account()));
-        List<TradeClient.Holding> holdings = client.holdings(); assertEquals(1, holdings.size());
-        moneyEquals(price, holdings.get(0).price); moneyEquals(quantity, holdings.get(0).quantity);
+        List<TradeClient.Holding> holdings = client.holdings();
+        assertEquals(1, holdings.size());
+        moneyEquals(price, holdings.get(0).price);
+        moneyEquals(quantity, holdings.get(0).quantity);
         assertEquals("s:4", holdings.get(0).symbol);
-        remember(account, cash, 1, 1); rememberOrder(order, price, "buy", quantity);
+        remember(account, cash, 1, 1);
+        rememberOrder(order, price, "buy", quantity);
         expected.setProperty("holding." + holdings.get(0).id + ".account", "" + account);
         expected.setProperty("holding." + holdings.get(0).id + ".price", price.toPlainString());
         expected.setProperty("holding." + holdings.get(0).id + ".quantity", quantity.toPlainString());
         expected.setProperty("holding." + holdings.get(0).id + ".symbol", "s:4");
     }
+
     @ParameterizedTest(name = "{0}")
     @CsvSource({"Full EJB synchronous,0,0,10", "Direct JDBC synchronous,1,0,11",
-                "Session EJB to JDBC synchronous,2,0,12", "Full EJB asynchronous two-phase,0,1,13"})
+            "Session EJB to JDBC synchronous,2,0,12", "Full EJB asynchronous two-phase,0,1,13"})
     void buyAndSellPreserveCashFeesOrdersAndFreshSessionState(String profile, int runtime, int orderMode, int account) throws Exception {
-        client.configure(runtime, orderMode); login(account);
+        client.configure(runtime, orderMode);
+        login(account);
         String symbol = "s:" + account;
         BigDecimal quantity = new BigDecimal("2"), buyPrice = BigDecimal.valueOf(50 + account).setScale(2);
         moneyEquals(buyPrice, client.quote(symbol));
         BigDecimal afterBuy = initialCash(account).subtract(buyPrice.multiply(quantity)).subtract(FEE);
         TradeClient.Order buy = submittedOrder(client.action("action", "buy", "symbol", symbol, "quantity", "2"));
         buy = awaitOrder(buy.id);
-        assertEquals("buy", buy.type); moneyEquals(buyPrice, buy.price); moneyEquals(quantity, buy.quantity); moneyEquals(FEE, buy.fee);
-        List<TradeClient.Holding> holdings = client.holdings(); assertEquals(1, holdings.size());
+        assertEquals("buy", buy.type);
+        moneyEquals(buyPrice, buy.price);
+        moneyEquals(quantity, buy.quantity);
+        moneyEquals(FEE, buy.fee);
+        List<TradeClient.Holding> holdings = client.holdings();
+        assertEquals(1, holdings.size());
         TradeClient.Holding holding = holdings.get(0);
-        moneyEquals(quantity, holding.quantity); moneyEquals(buyPrice, holding.price); assertEquals(symbol, holding.symbol);
+        moneyEquals(quantity, holding.quantity);
+        moneyEquals(buyPrice, holding.price);
+        assertEquals(symbol, holding.symbol);
         moneyEquals(afterBuy, TradeClient.cash(client.account()));
         assertEquals(200, client.logout().status);
-        client = new TradeClient(); login(account);
+        client = new TradeClient();
+        login(account);
         assertEquals(holding.id, client.holdings().get(0).id, "Holding must survive a new session");
         // The benchmark intentionally randomizes quote prices after trades. Capture the
         // current execution quote before selling and assert its independently calculated cash effect.
@@ -105,21 +152,34 @@ class TradingContractTest {
         BigDecimal finalCash = afterBuy.add(sellPrice.multiply(quantity)).subtract(FEE);
         TradeClient.Order sell = submittedOrder(client.action("action", "sell", "holdingID", "" + holding.id));
         sell = awaitOrder(sell.id);
-        assertEquals("sell", sell.type); assertEquals(symbol, sell.symbol);
-        moneyEquals(sellPrice, sell.price); moneyEquals(quantity, sell.quantity); moneyEquals(FEE, sell.fee);
-        assertTrue(client.holdings().isEmpty()); moneyEquals(finalCash, TradeClient.cash(client.account()));
-        client.logout(); client = new TradeClient(); login(account);
-        assertTrue(client.holdings().isEmpty()); assertEquals(2, client.orders().size());
+        assertEquals("sell", sell.type);
+        assertEquals(symbol, sell.symbol);
+        moneyEquals(sellPrice, sell.price);
+        moneyEquals(quantity, sell.quantity);
+        moneyEquals(FEE, sell.fee);
+        assertTrue(client.holdings().isEmpty());
+        moneyEquals(finalCash, TradeClient.cash(client.account()));
+        client.logout();
+        client = new TradeClient();
+        login(account);
+        assertTrue(client.holdings().isEmpty());
+        assertEquals(2, client.orders().size());
         moneyEquals(finalCash, TradeClient.cash(client.account()));
         remember(account, finalCash, 0, 2);
-        rememberOrder(buy, buyPrice, "buy", quantity); rememberOrder(sell, sellPrice, "sell", quantity);
+        rememberOrder(buy, buyPrice, "buy", quantity);
+        rememberOrder(sell, sellPrice, "sell", quantity);
     }
-    @Test void unknownQuotePurchaseRollsBackTradingState() throws Exception {
-        login(5); BigDecimal cash = initialCash(5);
+
+    @Test
+    void unknownQuotePurchaseRollsBackTradingState() throws Exception {
+        login(5);
+        BigDecimal cash = initialCash(5);
         moneyEquals(cash, TradeClient.cash(client.account()));
         assertEquals(500, client.action("action", "buy", "symbol", "missing:quote", "quantity", "2").status,
                 "Characterize the existing error response, without silently correcting it");
-        assertTrue(client.holdings().isEmpty()); assertTrue(client.orders().isEmpty());
-        moneyEquals(cash, TradeClient.cash(client.account())); remember(5, cash, 0, 0);
+        assertTrue(client.holdings().isEmpty());
+        assertTrue(client.orders().isEmpty());
+        moneyEquals(cash, TradeClient.cash(client.account()));
+        remember(5, cash, 0, 0);
     }
 }
