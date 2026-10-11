@@ -1,6 +1,6 @@
 # Building and running with Gradle
 
-Use the checked-in **Gradle 4.10.3 wrapper with Java 8**. Gradle is the sole
+Use the checked-in **Gradle 8.14.3 wrapper with Java 8**. Gradle is the sole
 supported build for this fork; Maven project descriptors have been removed.
 See [IDEA setup](Using-IDEA.md) or [Eclipse/WDT](Using-WDT.md) for IDE use.
 

@@ -1,14 +1,13 @@
 apply plugin: 'java'
 apply plugin: 'jacoco'
 
-sourceCompatibility = 1.8
-targetCompatibility = 1.8
 repositories { mavenCentral() }
 jacoco { toolVersion = '0.8.12' }
 configurations { serverAgent }
 dependencies {
     implementation 'org.apache.derby:derby:10.10.1.1'
     testImplementation 'org.junit.jupiter:junit-jupiter:5.10.3'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher:1.10.3'
     testImplementation 'org.jsoup:jsoup:1.17.2'
     serverAgent 'org.jacoco:org.jacoco.agent:0.8.12:runtime'
 }
@@ -23,8 +22,7 @@ def testPort = (findProperty('testHttpPort') ?: '19083').toString()
 def testHttpsPort = (findProperty('testHttpsPort') ?: '19443').toString()
 def testJmsPort = (findProperty('testJmsPort') ?: '17276').toString()
 def testJmsSslPort = (findProperty('testJmsSslPort') ?: '17286').toString()
-def javaHome = System.getProperty('java.home')
-if (new File(javaHome).name == 'jre') javaHome = new File(javaHome).parent
+def javaHome = javaToolchains.launcherFor { languageVersion = JavaLanguageVersion.of(8) }.get().metadata.installationPath.asFile.absolutePath
 
 def runtime = {
     file(earProject.hasProperty('libertyRoot') ? earProject.property('libertyRoot') : "${earProject.buildDir}/wlp")
@@ -63,7 +61,7 @@ task prepareTestServer(dependsOn: [':daytrader3-ee6:ear', ':daytrader3-ee6:insta
         def xml = rootProject.file('daytrader3-ee6-wlpcfg/servers/daytrader3_Sample/server.xml').text
         xml = xml.replace('httpPort="9083"', 'httpPort="' + testPort + '"')
                 .replace('httpsPort="9443"', 'httpsPort="' + testHttpsPort + '"')
-                .replace('location="daytrader3-ee6.ear"', 'location="' + earProject.tasks.ear.archivePath.absolutePath + '"')
+                .replace('location="daytrader3-ee6.ear"', 'location="' + earProject.tasks.ear.archiveFile.get().asFile.absolutePath + '"')
                 .replace('</server>', '<wasJmsEndpoint wasJmsPort="' + testJmsPort + '" wasJmsSSLPort="' + testJmsSslPort + '" /></server>')
         new File(server, 'server.xml').text = xml
         copy {
@@ -76,7 +74,7 @@ task prepareTestServer(dependsOn: [':daytrader3-ee6:ear', ':daytrader3-ee6:insta
 }
 
 task loadFixture(type: JavaExec, dependsOn: [classes, prepareTestServer]) {
-    main = 'baseline.DerbyFixture'
+    mainClass = 'baseline.DerbyFixture'
     workingDir buildDir
     systemProperty 'derby.stream.error.file', file("$buildDir/derby-fixture.log").absolutePath
     classpath = sourceSets.main.runtimeClasspath
@@ -213,14 +211,14 @@ task prepareCoverageClasses(dependsOn: [persistedTest, ':daytrader3-ee6-ejb:test
 task applicationCoverage(type: JacocoReport, dependsOn: prepareCoverageClasses) {
     description = 'Aggregates server integration coverage and EJB calculation unit coverage.'
     def modules = [project(':daytrader3-ee6-ejb'), project(':daytrader3-ee6-web'), project(':daytrader3-ee6-rest')]
-    classDirectories = files(modules.collect { file("$buildDir/coverage-classes/${it.name}") })
-    sourceDirectories = files(modules.collect { it.sourceSets.main.allJava.srcDirs })
-    executionData = files(coverage, project(':daytrader3-ee6-ejb').file('build/jacoco/test.exec'))
+    classDirectories.setFrom(files(modules.collect { file("$buildDir/coverage-classes/${it.name}") }))
+    sourceDirectories.setFrom(files(modules.collect { it.sourceSets.main.allJava.srcDirs }))
+    executionData.setFrom(files(coverage, project(':daytrader3-ee6-ejb').file('build/jacoco/test.exec')))
     reports {
-        html.enabled = true
-        xml.enabled = true
-        html.destination = file("$buildDir/reports/coverage")
-        xml.destination = file("$buildDir/reports/coverage.xml")
+        html.required = true
+        xml.required = true
+        html.outputLocation = file("$buildDir/reports/coverage")
+        xml.outputLocation = file("$buildDir/reports/coverage.xml")
     }
     doFirst {
         if (!coverage.exists() || coverage.length() == 0) throw new GradleException('No application-JVM coverage was collected.')

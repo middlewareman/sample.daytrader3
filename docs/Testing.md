@@ -1,6 +1,6 @@
 # Gradle verification on the restored platform
 
-Use the checked-in Gradle 4.10.3 wrapper with Java 8:
+Use the checked-in Gradle 8.14.3 wrapper with Java 8:
 
 ```bash
 ./gradlew --no-daemon --console=plain build
@@ -11,6 +11,11 @@ The same suite is reached by `:daytrader3-ee6:build` and
 alias for the verification module. Normal builds package the application and run
 an isolated test server; they do not deploy into or stop the interactive server.
 Use `:daytrader3-ee6:libertyStart` / `libertyStop` explicitly for interactive use.
+
+The build pins Liberty Gradle plugin 3.10.0 and a Java 8 toolchain. EJB
+application classes retain Java 7 bytecode; test classes and the JUnit runner use
+Java 8. JUnit Platform launcher 1.10.3 is explicit rather than supplied by Gradle.
+IBM Liberty 24.0.0.9 and the Java EE 6 features remain unchanged.
 
 ## Test structure and pinned tools
 

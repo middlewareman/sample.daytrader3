@@ -10,21 +10,21 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'net.wasdev.wlp.gradle.plugins:liberty-gradle-plugin:2.4'
+        classpath 'io.openliberty.tools:liberty-gradle-plugin:3.10.0'
     }
 }
-archivesBaseName = 'daytrader3-ee6'
+configurations { derbyDriver }
 
 ear {
-   manifest {
-      attributes 'Implementation-Title': 'DayTrader 3'
-   }
-   archiveName="$baseName.$extension"
+    manifest {
+        attributes 'Implementation-Title': 'DayTrader 3'
+    }
+    archiveFileName = 'daytrader3-ee6.ear'
 }
 
 task copyDerbyLib(type: Copy) {
     into "../daytrader3-ee6-wlpcfg/shared/resources/Daytrader3_SampleDerbyLibs"
-    from configurations.runtime
+    from configurations.derbyDriver
 }
 
 
@@ -37,40 +37,27 @@ task fvt {
 
 repositories { mavenCentral(); }
 dependencies {
-   // Pin the runtime separately from the Java EE 6 features used by server.xml.
-   if (!project.hasProperty('libertyRoot')) {
-       libertyRuntime 'com.ibm.websphere.appserver.runtime:wlp-javaee7:24.0.0.9@zip'
-   }
-   deploy project (path: ':daytrader3-ee6-ejb', configuration: 'archives')
-   deploy project (path: ':daytrader3-ee6-web', configuration: 'archives')
-   deploy project (path: ':daytrader3-ee6-rest', configuration: 'archives')
-   compile group: 'org.apache.derby', name: 'derby', version: '10.10.1.1'
-}
-String getHttpPort() {
-    def DEFAULT_HTTP_PORT = 9083
-    def serverXmlFile = file(new File('../daytrader3-ee6-wlpcfg/servers/daytrader3_Sample/server.xml'))
-    def portPattern = ~/.*httpPort="(\d+)".*/
-    serverXmlFile.eachLine { line ->
-        def portMatcher = line =~ portPattern
-        if (portMatcher) {
-            return portMatcher.group(1)
-        }
+    // Pin the runtime separately from the Java EE 6 features used by server.xml.
+    if (!project.hasProperty('libertyRoot')) {
+        libertyRuntime 'com.ibm.websphere.appserver.runtime:wlp-javaee7:24.0.0.9@zip'
     }
-    return DEFAULT_HTTP_PORT
+    deploy project(path: ':daytrader3-ee6-ejb', configuration: 'archives')
+    deploy project(path: ':daytrader3-ee6-web', configuration: 'archives')
+    deploy project(path: ':daytrader3-ee6-rest', configuration: 'archives')
+    derbyDriver group: 'org.apache.derby', name: 'derby', version: '10.10.1.1'
 }
-
-installApps.dependsOn 'ear'
-libertyStart.mustRunAfter 'installApps'
+deploy.dependsOn 'ear'
+libertyStart.mustRunAfter 'deploy'
 
 liberty {
     installDir = owner.hasProperty('libertyRoot') ? "${libertyRoot}" : null
     // Upstream committed generated server state; keep new logs/state in build/.
-    outputDir = "${buildDir}/liberty-output"
-    server{
+    userDir = rootProject.file('daytrader3-ee6-wlpcfg').absolutePath
+    server {
         name = 'daytrader3_Sample'
-        userDir = rootProject.getProjectDir().getAbsolutePath()+'/daytrader3-ee6-wlpcfg'
+        outputDir = "${buildDir}/liberty-output"
         looseApplication = false
-        apps = [file(ear.archivePath)]
+        deploy { apps = [ear] }
     }
 }
 
@@ -90,13 +77,13 @@ task installDayTraderFeatures(type: Exec, dependsOn: installLiberty) {
         def runtimeDir = liberty.installDir ?: "${buildDir}/wlp"
         def suffix = System.getProperty('os.name').toLowerCase().contains('windows') ? '.bat' : ''
         executable = new File(runtimeDir, "bin/featureUtility${suffix}").absolutePath
-        environment 'JAVA_HOME', System.getProperty('java.home')
+        environment 'JAVA_HOME', javaToolchains.launcherFor { languageVersion = JavaLanguageVersion.of(8) }.get().metadata.installationPath.asFile.absolutePath
     }
     args 'installFeature', 'ejbLite-3.1', 'jsf-2.0', 'jaxrs-1.1', 'jpa-2.0',
          'jmsMdb-3.1', 'wasJmsServer-1.0', 'wasJmsClient-1.1'
 }
 
-libertyStart.dependsOn installDayTraderFeatures, copyDerbyLib, installApps
+libertyStart.dependsOn installDayTraderFeatures, copyDerbyLib, deploy
 
 // Normal builds package the EAR; deployment is explicit through libertyStart.
 

@@ -6,6 +6,11 @@ IBM Liberty 24.0.0.9 (`wlp-javaee7` distribution), with the older features insta
 separately. The runtime has IBM license terms in `wlp/lafiles`; the sample's Apache
 license does not replace those terms. This is a local legacy baseline.
 
+The subsequent tooling branch uses Gradle 8.14.3 / Liberty plugin 3.10.0
+with an explicit Java 8 toolchain. The restoration revision and the pinned IBM
+runtime/features remain separately recorded; this tooling change does not migrate
+the application platform.
+
 ## Build and start
 
 Set `JAVA_HOME` to an installed Java 8 JDK. See [IDEA setup](Using-IDEA.md) for
